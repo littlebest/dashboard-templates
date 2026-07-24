@@ -264,15 +264,17 @@ charts.treemap = Dashboard.createChart('treemap', {
     label: {
       show: true,
       formatter: function(params) {
-        const d = params.data;
-        if (d.days !== undefined) {
-          return `{name|${params.name}}\n{value|${d.value}万 · ${d.days}天}`;
-        }
-        return `{name|${params.name}}\n{value|${d.value}万}`;
+        // 只显示名称，去掉 value、{} 等干扰
+        return params.name;
       },
       rich: {
-        name: { color: '#fff', fontSize: 12, fontWeight: 'bold', textShadowColor: '#000', textShadowBlur: 3 },
-        value: { color: 'rgba(255,255,255,0.85)', fontSize: 10, fontFamily: 'Courier New' }
+        name: {
+          color: '#fff',
+          fontSize: 12,
+          fontWeight: 'bold',
+          textShadowColor: '#000',
+          textShadowBlur: 3
+        }
       }
     },
     upperLabel: {
