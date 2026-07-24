@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C6 - 仪表盘/进度环</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+  body { padding: 20px; }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; max-width: 1200px; margin: 0 auto; }
+  .card-title { color: var(--primary); font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 3px solid var(--secondary); }
+  .chart { width: 100%; height: 320px; }
+</style>
+</head>
+<body>
+<h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C6 - 仪表盘/进度环</h2>
+<div class="demo-grid">
+  <div class="card">
+    <div class="card-title">传统仪表盘</div>
+    <div class="chart" id="g1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">进度环（多指标）</div>
+    <div class="chart" id="g2"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">速度计风格</div>
+    <div class="chart" id="g3"></div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+// 1. 传统仪表盘
+Dashboard.createChart('g1', {
+  backgroundColor: 'transparent',
+  series: [{
+    type: 'gauge',
+    startAngle: 200, endAngle: -20,
+    min: 0, max: 100,
+    progress: {
+      show: true, width: 18,
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0,0,1,0,[
+          {offset:0,color:'#00d4ff'},
+          {offset:1,color:'#a855f7'}
+        ])
+      }
+    },
+    axisLine: { lineStyle: { width: 18, color: [[1, 'rgba(74,144,226,0.15)']] } },
+    pointer: { show: false },
+    axisTick: { show: false },
+    splitLine: { show: false },
+    axisLabel: { show: false },
+    anchor: { show: false },
+    detail: {
+      valueAnimation: true,
+      fontSize: 36,
+      color: '#fff',
+      formatter: '{value}%',
+      offsetCenter: [0, '10%']
+    },
+    title: {
+      offsetCenter: [0, '40%'],
+      fontSize: 14,
+      color: Dashboard.TEXT_COLOR
+    },
+    data: [{ value: 78, name: '设备稼动率' }]
+  }]
+});
+
+// 2. 进度环（多个仪表）
+Dashboard.createChart('g2', {
+  backgroundColor: 'transparent',
+  series: [
+    { name: '满意度', type: 'gauge', radius: '35%', center: ['25%', '50%'],
+      startAngle: 90, endAngle: -270, progress: { show: true, roundCap: true, width: 6,
+        itemStyle: { color: '#00d4ff' } },
+      axisLine: { lineStyle: { width: 6, color: [[1, 'rgba(74,144,226,0.15)']] } },
+      splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false },
+      pointer: { show: false }, detail: { valueAnimation: true, fontSize: 16, color: '#fff',
+        formatter: '{value}%', offsetCenter: [0, '0%'] },
+      title: { offsetCenter: [0, '70%'], fontSize: 10, color: Dashboard.TEXT_COLOR },
+      data: [{ value: 95, name: '满意度' }] },
+    { name: '完成率', type: 'gauge', radius: '35%', center: ['50%', '50%'],
+      startAngle: 90, endAngle: -270, progress: { show: true, roundCap: true, width: 6,
+        itemStyle: { color: '#a855f7' } },
+      axisLine: { lineStyle: { width: 6, color: [[1, 'rgba(74,144,226,0.15)']] } },
+      splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false },
+      pointer: { show: false }, detail: { valueAnimation: true, fontSize: 16, color: '#fff',
+        formatter: '{value}%', offsetCenter: [0, '0%'] },
+      title: { offsetCenter: [0, '70%'], fontSize: 10, color: Dashboard.TEXT_COLOR },
+      data: [{ value: 78, name: '完成率' }] },
+    { name: '良品率', type: 'gauge', radius: '35%', center: ['75%', '50%'],
+      startAngle: 90, endAngle: -270, progress: { show: true, roundCap: true, width: 6,
+        itemStyle: { color: '#ff6b35' } },
+      axisLine: { lineStyle: { width: 6, color: [[1, 'rgba(74,144,226,0.15)']] } },
+      splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false },
+      pointer: { show: false }, detail: { valueAnimation: true, fontSize: 16, color: '#fff',
+        formatter: '{value}%', offsetCenter: [0, '0%'] },
+      title: { offsetCenter: [0, '70%'], fontSize: 10, color: Dashboard.TEXT_COLOR },
+      data: [{ value: 92, name: '良品率' }] }
+  ]
+});
+
+// 3. 速度计
+Dashboard.createChart('g3', {
+  backgroundColor: 'transparent',
+  series: [{
+    type: 'gauge',
+    startAngle: 90, endAngle: -270,
+    min: 0, max: 200,
+    axisLine: { lineStyle: { width: 20, color: [
+      [0.6, '#10b981'], [0.8, '#f59e0b'], [1, '#ef4444']
+    ] } },
+    pointer: {
+      icon: 'path://M2.9,0.7L2.9,0.7c1.4,0,2.6,1.2,2.6,2.6v115c0,1.4-1.2,2.6-2.6,2.6l0,0c-1.4,0-2.6-1.2-2.6-2.6V3.3C0.3,1.9,1.5,0.7,2.9,0.7z',
+      length: '70%', width: 8
+    },
+    axisTick: { length: 8, lineStyle: { color: '#fff' } },
+    splitLine: { length: 15, lineStyle: { width: 2, color: '#fff' } },
+    axisLabel: { color: Dashboard.TEXT_COLOR, distance: 18, fontSize: 10 },
+    anchor: { show: true, size: 18, itemStyle: { color: '#a855f7' } },
+    title: { show: false },
+    detail: {
+      valueAnimation: true, fontSize: 28, color: '#fff',
+      formatter: '{value} km/h', offsetCenter: [0, '70%']
+    },
+    data: [{ value: 142 }]
+  }]
+});
+</script>
+</body>
+</html>
