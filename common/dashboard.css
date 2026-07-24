@@ -81,3 +81,56 @@ body::before {
   background: radial-gradient(ellipse at center, #2d1b4e 0%, #1a0d33 50%, #0a0518 100%);
 }
 .theme-purple .card { border-color: rgba(168,85,247,0.4); }
+
+/* 大屏导航条 - 全屏浮动按钮 */
+.nav-bar {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 999;
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 14px;
+  background: linear-gradient(135deg, rgba(22,33,62,0.95), rgba(15,25,50,0.98));
+  border: 1px solid rgba(74,144,226,0.5);
+  border-radius: 22px;
+  color: #00d4ff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.25s ease;
+  box-shadow: 0 0 12px rgba(0,212,255,0.15);
+  letter-spacing: 0.5px;
+}
+.nav-btn:hover {
+  border-color: #00d4ff;
+  background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(168,85,247,0.2));
+  box-shadow: 0 0 20px rgba(0,212,255,0.5);
+  transform: translateY(-1px);
+  color: #fff;
+}
+.nav-btn:active { transform: translateY(0); }
+.nav-btn .icon { font-size: 16px; margin-right: 4px; }
+.nav-btn .label { display: inline-block; }
+
+/* 时间戳挪到右上角，跟导航不冲突 */
+.time { top: 22px !important; right: 24px !important; }
+
+/* 手机端导航优化 */
+@media (max-width: 768px) {
+  .nav-bar { top: 12px; left: 12px; gap: 8px; }
+  .nav-btn { min-width: 38px; height: 38px; padding: 0 10px; font-size: 12px; border-radius: 19px; }
+  .nav-btn .label { display: none; }  /* 手机只显示图标 */
+  .nav-btn .icon { margin-right: 0; font-size: 16px; }
+  .time { top: 18px !important; right: 14px !important; font-size: 12px !important; }
+}
