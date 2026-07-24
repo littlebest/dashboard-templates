@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>10行业20张大屏模板库</title>
+<link rel="stylesheet" href="common/dashboard.css">
+<style>
+body { padding: 40px 20px; }
+h1 {
+  text-align: center; font-size: 36px; margin-bottom: 12px;
+  background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.sub { text-align: center; color: var(--text-secondary); margin-bottom: 30px; letter-spacing: 4px; }
+.industry {
+  max-width: 1400px; margin: 0 auto 30px;
+  background: linear-gradient(135deg, rgba(22,33,62,0.7), rgba(15,25,50,0.9));
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px;
+}
+.industry-title {
+  font-size: 20px; color: var(--primary); margin-bottom: 16px;
+  padding-bottom: 8px; border-bottom: 1px solid rgba(74,144,226,0.2);
+}
+.industry-title span { color: var(--secondary); font-size: 14px; margin-left: 12px; }
+.cards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;
+}
+.card-link {
+  background: linear-gradient(135deg, rgba(15,25,50,0.9), rgba(10,20,40,0.95));
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px; cursor: pointer; transition: all 0.3s;
+  text-decoration: none; color: inherit; display: block;
+}
+.card-link:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 20px rgba(0,212,255,0.3);
+  transform: translateY(-2px);
+}
+.card-link .num {
+  font-size: 12px; color: var(--primary);
+  font-family: 'Courier New', monospace; margin-bottom: 8px;
+}
+.card-link .name {
+  font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 8px;
+}
+.card-link .desc {
+  font-size: 11px; color: var(--text-secondary); line-height: 1.6;
+}
+.toolbar {
+  text-align: center; margin: 30px auto; padding: 20px;
+  max-width: 1400px;
+  background: rgba(22,33,62,0.5); border-radius: 12px;
+}
+.toolbar a {
+  display: inline-block; padding: 10px 24px; margin: 0 8px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff; text-decoration: none; border-radius: 6px;
+  font-weight: 600;
+}
+.toolbar a:hover { box-shadow: 0 0 20px rgba(0,212,255,0.4); }
+footer { text-align: center; color: var(--text-secondary); margin-top: 40px; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>📊 10个行业 20张大屏模板</h1>
+<div class="sub">DASHBOARD TEMPLATE LIBRARY · v1.0</div>
+
+<div class="toolbar">
+  <a href="../components/index.html">🧩 查看通用组件库（8个组件）</a>
+  <a href="javascript:location.reload()">🔄 刷新本页</a>
+</div>
+
+<div class="industry">
+  <div class="industry-title">1️⃣ 制造业 <span>MANUFACTURING</span></div>
+  <div class="cards">
+    <a href="templates/t1_manufacturing_dashboard.html" class="card-link">
+      <div class="num">01</div>
+      <div class="name">生产经营驾驶舱</div>
+      <div class="desc">核心指标：计划达成/良品率/OEE/稼动率<br>图表：产量趋势/车间产能/异常类型</div>
+    </a>
+    <a href="templates/t1_manufacturing_quality.html" class="card-link">
+      <div class="num">02</div>
+      <div class="name">质量管理大屏</div>
+      <div class="desc">核心指标：合格率/不良率/返工率/客诉<br>图表：质量趋势/责任工序/等级分布</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">2️⃣ 零售业 <span>RETAIL</span></div>
+  <div class="cards">
+    <a href="templates/t2_retail_store.html" class="card-link">
+      <div class="num">03</div>
+      <div class="name">门店经营分析</div>
+      <div class="desc">核心指标：销售/毛利/客流/坪效<br>图表：销售趋势/转化漏斗/费用占比</div>
+    </a>
+    <a href="templates/t2_retail_product.html" class="card-link">
+      <div class="num">04</div>
+      <div class="name">商品销售分析</div>
+      <div class="desc">核心指标：销售额/动销率/周转/缺货<br>图表：爆品TOP/品类占比/库存周转</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">3️⃣ 电商 <span>E-COMMERCE</span></div>
+  <div class="cards">
+    <a href="templates/t3_ecommerce_overview.html" class="card-link">
+      <div class="num">05</div>
+      <div class="name">电商经营总览</div>
+      <div class="desc">核心指标：GMV/订单/客单价/复购<br>图表：双轴趋势/转化漏斗/地区分布</div>
+    </a>
+    <a href="templates/t3_ecommerce_profit.html" class="card-link">
+      <div class="num">06</div>
+      <div class="name">电商费用利润</div>
+      <div class="desc">核心指标：销售/推广/物流/净利率<br>图表：收入成本/费用结构/ROI对比</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">4️⃣ 物流 <span>LOGISTICS</span></div>
+  <div class="cards">
+    <a href="templates/t4_logistics_cost.html" class="card-link">
+      <div class="num">07</div>
+      <div class="name">物流成本分析</div>
+      <div class="desc">核心指标：总成本/单订单/运费/异常赔付<br>图表：成本结构/线路成本/仓库对比</div>
+    </a>
+    <a href="templates/t4_logistics_delivery.html" class="card-link">
+      <div class="num">08</div>
+      <div class="name">运输履约大屏</div>
+      <div class="desc">核心指标：准时发货/送达/破损/投诉<br>图表：履约时长/承运商绩效/异常率</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">5️⃣ 财务 <span>FINANCE</span></div>
+  <div class="cards">
+    <a href="templates/t5_finance_profit.html" class="card-link">
+      <div class="num">09</div>
+      <div class="name">经营利润分析</div>
+      <div class="desc">核心指标：营收/净利/毛利率/费用率<br>图表：收入成本/费用结构/产品利润</div>
+    </a>
+    <a href="templates/t5_finance_cashflow.html" class="card-link">
+      <div class="num">10</div>
+      <div class="name">现金流预警</div>
+      <div class="desc">核心指标：现金余额/净现金流/应收/安全线<br>图表：现金流趋势/流入流出/账龄</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">6️⃣ 销售 <span>SALES</span></div>
+  <div class="cards">
+    <a href="templates/t6_sales_target.html" class="card-link">
+      <div class="num">11</div>
+      <div class="name">销售目标达成</div>
+      <div class="desc">核心指标：目标/完成额/完成率/预测<br>图表：完成进度/区域排名/缺口分析</div>
+    </a>
+    <a href="templates/t6_sales_customer.html" class="card-link">
+      <div class="num">12</div>
+      <div class="name">客户经营分析</div>
+      <div class="desc">核心指标：客户数/新客/复购率/流失<br>图表：客户分级/复购周期/流失预警</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">7️⃣ 人力资源 <span>HUMAN RESOURCES</span></div>
+  <div class="cards">
+    <a href="templates/t7_hr_org.html" class="card-link">
+      <div class="num">13</div>
+      <div class="name">组织结构分析</div>
+      <div class="desc">核心指标：总人数/部门/司龄/流动率<br>图表：部门分布/职级结构/学历构成</div>
+    </a>
+    <a href="templates/t7_hr_efficiency.html" class="card-link">
+      <div class="num">14</div>
+      <div class="name">人效分析</div>
+      <div class="desc">核心指标：人均收入/利润/费用率/投入产出<br>图表：人效排名/部门对比/投入产出</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">8️⃣ 项目管理 <span>PROJECT MANAGEMENT</span></div>
+  <div class="cards">
+    <a href="templates/t8_project_progress.html" class="card-link">
+      <div class="num">15</div>
+      <div class="name">项目进度管理</div>
+      <div class="desc">核心指标：项目数/进行中/延期/里程碑<br>图表：状态分布/进度偏差/风险项目</div>
+    </a>
+    <a href="templates/t8_project_profit.html" class="card-link">
+      <div class="num">16</div>
+      <div class="name">项目利润与回款</div>
+      <div class="desc">核心指标：合同/毛利/已回款/毛利率<br>图表：利润对比/回款进度/现金流</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">9️⃣ 设备运维 <span>EQUIPMENT</span></div>
+  <div class="cards">
+    <a href="templates/t9_equipment_fault.html" class="card-link">
+      <div class="num">17</div>
+      <div class="name">设备故障分析</div>
+      <div class="desc">核心指标：故障次数/停机/修复时间/损失<br>图表：故障趋势/类型分布/设备排名</div>
+    </a>
+    <a href="templates/t9_equipment_oee.html" class="card-link">
+      <div class="num">18</div>
+      <div class="name">OEE设备效率</div>
+      <div class="desc">核心指标：OEE/稼动率/性能/良品率<br>图表：三损分解/设备对比/效率等级</div>
+    </a>
+  </div>
+</div>
+
+<div class="industry">
+  <div class="industry-title">🔟 供应链 <span>SUPPLY CHAIN</span></div>
+  <div class="cards">
+    <a href="templates/t10_supply_inventory.html" class="card-link">
+      <div class="num">19</div>
+      <div class="name">库存健康分析</div>
+      <div class="desc">核心指标：库存/周转/呆滞/缺货<br>图表：库龄分布/呆滞TOP/安全库存</div>
+    </a>
+    <a href="templates/t10_supply_supplier.html" class="card-link">
+      <div class="num">20</div>
+      <div class="name">供应商绩效管理</div>
+      <div class="desc">核心指标：供应商数/准时率/采购/合格率<br>图表：绩效排名/价格波动/集中度</div>
+    </a>
+  </div>
+</div>
+
+<footer>
+  © 2026 鹏程万里 Dashboard System<br>
+  36 张原始大屏 + 8 个通用组件 + 20 个行业模板 = 完整可视化解决方案
+</footer>
+</body>
+</html>
