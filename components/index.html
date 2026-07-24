@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>大屏组件库导航</title>
+<link rel="stylesheet" href="common/dashboard.css">
+<style>
+  body { padding: 40px 20px; }
+  h1 {
+    text-align: center;
+    font-size: 36px;
+    background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .sub {
+    text-align: center; color: var(--text-secondary);
+    margin-bottom: 40px; letter-spacing: 4px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .item {
+    background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent, rgba(0,212,255,0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  .item:hover::before { transform: translateX(100%); }
+  .item:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 30px rgba(0,212,255,0.3);
+    transform: translateY(-4px);
+  }
+  .icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .name { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+  .num {
+    position: absolute;
+    top: 10px; right: 14px;
+    font-size: 12px; color: var(--primary);
+    font-family: 'Courier New', monospace;
+  }
+  footer {
+    text-align: center; color: var(--text-secondary);
+    margin-top: 40px; font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<h1>📊 数据大屏组件库</h1>
+<div class="sub">DASHBOARD COMPONENT LIBRARY · v1.0</div>
+
+<div class="grid">
+  <a href="C1_kpi.html" class="item">
+    <span class="num">C1</span>
+    <div class="icon">💎</div>
+    <div class="name">KPI 数字卡</div>
+    <div class="desc">核心指标展示<br>支持同比/环比<br>带迷你趋势图</div>
+  </a>
+  <a href="C2_pie.html" class="item">
+    <span class="num">C2</span>
+    <div class="icon">🍩</div>
+    <div class="name">环形图/饼图</div>
+    <div class="desc">单层/双层/玫瑰<br>占比构成分析</div>
+  </a>
+  <a href="C3_dual_axis.html" class="item">
+    <span class="num">C3</span>
+    <div class="icon">📊</div>
+    <div class="name">双轴组合图</div>
+    <div class="desc">柱状+折线<br>趋势 + 增长率</div>
+  </a>
+  <a href="C4_funnel.html" class="item">
+    <span class="num">C4</span>
+    <div class="icon">🔻</div>
+    <div class="name">漏斗图</div>
+    <div class="desc">转化漏斗<br>销售 LTC 流程</div>
+  </a>
+  <a href="C5_3d.html" class="item">
+    <span class="num">C5</span>
+    <div class="icon">🧊</div>
+    <div class="name">3D 柱状图</div>
+    <div class="desc">3D柱状/3D饼图<br>维度立体化</div>
+  </a>
+  <a href="C6_gauge.html" class="item">
+    <span class="num">C6</span>
+    <div class="icon">⚡</div>
+    <div class="name">仪表盘/进度环</div>
+    <div class="desc">传统仪表<br>多指标进度环</div>
+  </a>
+  <a href="C7_table.html" class="item">
+    <span class="num">C7</span>
+    <div class="icon">📋</div>
+    <div class="name">表格 + 排名</div>
+    <div class="desc">横向条形排名<br>多维数据表格</div>
+  </a>
+  <a href="C8_map.html" class="item">
+    <span class="num">C8</span>
+    <div class="icon">🗺️</div>
+    <div class="name">中国地图</div>
+    <div class="desc">地域分布热力<br>飞线/散点</div>
+  </a>
+</div>
+
+<footer>© 2026 鹏程万里 Dashboard System · 36 张原始大屏 + 8 个组件 + 20 个行业模板</footer>
+</body>
+</html>
