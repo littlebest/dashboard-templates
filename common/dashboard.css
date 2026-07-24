@@ -151,18 +151,24 @@ body[data-theme="minimal"] .card::before, body[data-theme="minimal"] .card::afte
   height: 44px;
   padding: 0 14px;
   background: linear-gradient(135deg, rgba(22,33,62,0.95), rgba(15,25,50,0.98));
-  border: 1px solid var(--primary);
+  border: 1.5px solid var(--primary);
   border-radius: 22px;
   color: var(--primary);
   text-decoration: none;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.25s ease;
-  box-shadow: 0 0 12px var(--primary-glow);
+  box-shadow: 0 0 12px var(--primary-glow), 0 2px 6px rgba(0,0,0,0.4);
   letter-spacing: 0.5px;
   font-family: inherit;
+  text-shadow: 0 0 8px var(--primary-glow);
+}
+.nav-btn .icon {
+  font-size: 16px;
+  margin-right: 4px;
+  filter: drop-shadow(0 0 4px var(--primary-glow));
 }
 .nav-btn:hover {
   background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(168,85,247,0.2));
@@ -174,24 +180,27 @@ body[data-theme="minimal"] .card::before, body[data-theme="minimal"] .card::afte
 .nav-btn .icon { font-size: 16px; margin-right: 4px; }
 .nav-btn .label { display: inline-block; }
 body[data-theme="minimal"] .nav-btn {
-  background: #fff;
-  border-color: #333;
-  color: #333;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-color: #000000;
+  color: #000000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  text-shadow: none;
+}
+body[data-theme="minimal"] .nav-btn .icon {
+  filter: none;
 }
 body[data-theme="minimal"] .nav-btn:hover {
-  background: #333;
+  background: #000;
   color: #fff;
 }
 
 /* ============================================ */
-/* 主题切换器 - 顶部居中胶囊                     */
+/* 主题切换器 - 右上角胶囊（避开 title）            */
 /* ============================================ */
 .theme-switcher {
   position: fixed;
   top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 24px;
   z-index: 9999;
   display: flex;
   gap: 6px;
