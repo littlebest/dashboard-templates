@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C3 - 双轴组合图</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+  body { padding: 20px; }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1200px; margin: 0 auto; }
+  .card-title { color: var(--primary); font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 3px solid var(--secondary); }
+  .chart { width: 100%; height: 320px; }
+</style>
+</head>
+<body>
+<h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C3 - 双轴柱状+折线</h2>
+<div class="demo-grid">
+  <div class="card">
+    <div class="card-title">柱状+折线（销量/增长率）</div>
+    <div class="chart" id="c1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">分组柱状+折线</div>
+    <div class="chart" id="c2"></div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月'];
+
+// 1. 柱状+折线
+Dashboard.createChart('c1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '8%', right: '8%', top: '20%', bottom: '10%' },
+  xAxis: { type: 'category', data: MONTHS, ...Dashboard.axisStyle() },
+  yAxis: [
+    { type: 'value', name: '销量', ...Dashboard.axisStyle() },
+    { type: 'value', name: '增长率%', ...Dashboard.axisStyle(), splitLine: { show: false } }
+  ],
+  series: [
+    {
+      name: '销量', type: 'bar', barWidth: 20,
+      data: [320, 280, 350, 410, 380, 450, 420, 480],
+      itemStyle: { borderRadius: [4,4,0,0], color: Dashboard.barGradient('#00d4ff') }
+    },
+    {
+      name: '增长率', type: 'line', yAxisIndex: 1, smooth: true,
+      data: [5.2, 3.8, 7.5, 9.2, 6.8, 11.2, 8.5, 12.3],
+      ...Dashboard.lineStyle('#a855f7', false),
+      itemStyle: { color: '#a855f7' }
+    }
+  ]
+});
+
+// 2. 分组柱状+折线
+Dashboard.createChart('c2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '8%', right: '8%', top: '20%', bottom: '10%' },
+  xAxis: { type: 'category', data: MONTHS, ...Dashboard.axisStyle() },
+  yAxis: [
+    { type: 'value', name: '金额(万)', ...Dashboard.axisStyle() },
+    { type: 'value', name: '成本(万)', ...Dashboard.axisStyle(), splitLine: { show: false } }
+  ],
+  series: [
+    {
+      name: '收入', type: 'bar', barWidth: 10,
+      data: [1200, 1180, 1450, 1620, 1580, 1820, 2050, 2280],
+      itemStyle: { borderRadius: [4,4,0,0], color: Dashboard.barGradient('#10b981') }
+    },
+    {
+      name: '成本', type: 'bar', barWidth: 10,
+      data: [820, 850, 920, 1020, 1050, 1080, 1180, 1240],
+      itemStyle: { borderRadius: [4,4,0,0], color: Dashboard.barGradient('#ff6b35') }
+    },
+    {
+      name: '利润率', type: 'line', yAxisIndex: 1, smooth: true,
+      data: [31.7, 27.9, 36.6, 37.0, 33.5, 40.7, 42.4, 45.6],
+      ...Dashboard.lineStyle('#f59e0b', false)
+    }
+  ]
+});
+</script>
+</body>
+</html>
