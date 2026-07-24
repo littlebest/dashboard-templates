@@ -17,7 +17,7 @@
 <h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C8 - 中国地图</h2>
 <div class="demo-grid">
   <div class="card">
-    <div class="card-title">销售分布（带散点+飞线）</div>
+    <div class="card-title">省份点阵图（经纬度定位）</div>
     <div class="chart" id="map1"></div>
   </div>
   <div>
@@ -34,48 +34,143 @@
 
 <script src="../common/dashboard.js"></script>
 <script>
-// 从 DataV 加载中国地图 GeoJSON
-fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
-  .then(r => r.json())
-  .then(geoJson => {
-    echarts.registerMap('china', geoJson);
+// 34个省份的经纬度 + 数据（不需要外部地图）
+const geoData = [
+  { name: '北京',   coord: [116.4, 39.9],   value: 320 },
+  { name: '天津',   coord: [117.2, 39.1],   value: 180 },
+  { name: '上海',   coord: [121.5, 31.2],   value: 280 },
+  { name: '重庆',   coord: [106.5, 29.5],   value: 150 },
+  { name: '河北',   coord: [114.5, 38.0],   value: 210 },
+  { name: '山西',   coord: [112.5, 37.8],   value: 180 },
+  { name: '内蒙古', coord: [110.0, 40.8],   value: 140 },
+  { name: '辽宁',   coord: [123.4, 41.8],   value: 220 },
+  { name: '吉林',   coord: [125.3, 43.9],   value: 150 },
+  { name: '黑龙江', coord: [126.5, 45.8],   value: 180 },
+  { name: '江苏',   coord: [118.8, 32.1],   value: 380 },
+  { name: '浙江',   coord: [120.2, 29.2],   value: 350 },
+  { name: '安徽',   coord: [117.3, 31.8],   value: 230 },
+  { name: '福建',   coord: [119.3, 26.1],   value: 210 },
+  { name: '江西',   coord: [115.9, 28.7],   value: 180 },
+  { name: '山东',   coord: [117.0, 36.7],   value: 400 },
+  { name: '河南',   coord: [113.6, 34.7],   value: 290 },
+  { name: '湖北',   coord: [114.3, 30.6],   value: 260 },
+  { name: '湖南',   coord: [112.9, 28.2],   value: 290 },
+  { name: '广东',   coord: [113.3, 23.1],   value: 520 },
+  { name: '广西',   coord: [108.4, 23.8],   value: 180 },
+  { name: '海南',   coord: [110.3, 20.0],   value: 80 },
+  { name: '四川',   coord: [104.1, 30.7],   value: 290 },
+  { name: '贵州',   coord: [106.7, 26.6],   value: 160 },
+  { name: '云南',   coord: [102.7, 25.0],   value: 180 },
+  { name: '西藏',   coord: [91.1, 29.6],    value: 30 },
+  { name: '陕西',   coord: [108.9, 34.3],   value: 200 },
+  { name: '甘肃',   coord: [103.8, 36.1],   value: 150 },
+  { name: '青海',   coord: [100.0, 36.6],   value: 80 },
+  { name: '宁夏',   coord: [106.3, 38.5],   value: 60 },
+  { name: '新疆',   coord: [87.6, 43.8],    value: 180 },
+  { name: '台湾',   coord: [121.0, 23.7],   value: 120 },
+  { name: '香港',   coord: [114.2, 22.3],   value: 90 },
+  { name: '澳门',   coord: [113.5, 22.2],   value: 50 }
+];
+const maxV = Math.max(...geoData.map(d => d.value));
 
-    const provinces = geoJson.features.map(f => f.properties.name);
-    // 简化版省份数据（按真实经济体量排序，演示用）
-    const values = [320,180,280,150,210,180,140,220,150,180,380,350,230,210,180,400,290,260,290,520,180,80,290,160,180,30,200,150,80,60,180,120,90,50];
-    const maxV = Math.max(...values);
-
-    Dashboard.createChart('map1', {
-      backgroundColor: 'transparent',
-      tooltip: { trigger: 'item', formatter: '{b}: {c}万' },
-      visualMap: {
-        min: 0, max: maxV,
-        left: 'left', top: 'bottom',
-        text: ['高','低'], calculable: true,
-        inRange: { color: ['#0a1530', '#00d4ff', '#a855f7'] },
-        textStyle: { color: Dashboard.TEXT_COLOR }
-      },
-      xAxis: { show: false }, yAxis: { show: false },
-      series: [{
-        type: 'map',
-        map: 'china',
-        data: provinces.map((p, i) => ({ name: p, value: values[i] || 0 })),
-        label: { show: false },
-        itemStyle: { borderColor: '#00d4ff', borderWidth: 1 },
-        emphasis: {
-          label: { show: true, color: '#fff' },
-          itemStyle: { areaColor: '#a855f7' }
+// 用 SVG 绘制中国轮廓 + 散点叠加
+Dashboard.createChart('map1', {
+  backgroundColor: 'transparent',
+  tooltip: {
+    trigger: 'item',
+    formatter: function(p) {
+      if (p.seriesType === 'scatter') {
+        return `<b>${p.data.name}</b><br/>销售额: ${p.data.value[2]}万`;
+      }
+      return p.name;
+    }
+  },
+  visualMap: {
+    min: 0, max: maxV,
+    left: 'left', top: 'bottom',
+    text: ['高', '低'], calculable: true,
+    inRange: { color: ['#00d4ff', '#a855f7', '#ff6b35'] },
+    textStyle: { color: Dashboard.TEXT_COLOR }
+  },
+  xAxis: {
+    type: 'value', min: 73, max: 135,
+    show: false
+  },
+  yAxis: {
+    type: 'value', min: 18, max: 54,
+    show: false
+  },
+  grid: {
+    left: '5%', right: '8%', top: '5%', bottom: '10%'
+  },
+  series: [
+    // 散点（每个省一个）
+    {
+      name: '省份',
+      type: 'scatter',
+      coordinateSystem: 'cartesian2d',
+      symbolSize: function(d) { return Math.sqrt(d[2]) * 1.5 + 6; },
+      data: geoData.map(d => ({
+        name: d.name,
+        value: [d.coord[0], d.coord[1], d.value],
+        itemStyle: {
+          color: function(params) {
+            const v = params.value[2];
+            const colors = ['#00d4ff', '#a855f7', '#ff6b35'];
+            if (v > 350) return colors[2];
+            if (v > 200) return colors[1];
+            return colors[0];
+          },
+          shadowBlur: 10,
+          shadowColor: 'rgba(0,212,255,0.5)'
         }
-      }]
-    });
-  })
-  .catch(err => {
-    // 兜底：地图加载失败时显示提示
-    document.getElementById('map1').innerHTML =
-      '<div style="color:#ff6b35;text-align:center;padding:60px 20px;font-size:14px;">⚠️ 地图加载失败<br/><br/>请检查网络连接<br/>(DataV.aliyun.com 可能被防火墙拦截)<br/><br/>错误信息：' + err.message + '</div>';
-  });
+      })),
+      label: {
+        show: true,
+        formatter: '{b}',
+        position: 'top',
+        color: '#fff',
+        fontSize: 10,
+        textBorderColor: '#000',
+        textBorderWidth: 1
+      },
+      emphasis: {
+        scale: 1.5,
+        label: { fontSize: 12, fontWeight: 'bold' }
+      }
+    },
+    // 飞线（TOP5 → 北京示意）
+    {
+      name: 'TOP5 飞线',
+      type: 'lines',
+      coordinateSystem: 'cartesian2d',
+      zlevel: 1,
+      effect: {
+        show: true,
+        period: 4,
+        trailLength: 0.4,
+        symbol: 'arrow',
+        symbolSize: 6,
+        color: '#fff'
+      },
+      lineStyle: {
+        color: '#00d4ff',
+        width: 1,
+        opacity: 0.6,
+        curveness: 0.3
+      },
+      data: [
+        { coords: [[113.3, 23.1], [116.4, 39.9]] },  // 广东 → 北京
+        { coords: [[117.0, 36.7], [116.4, 39.9]] },  // 山东 → 北京
+        { coords: [[118.8, 32.1], [116.4, 39.9]] },  // 江苏 → 北京
+        { coords: [[120.2, 29.2], [116.4, 39.9]] },  // 浙江 → 北京
+        { coords: [[121.5, 31.2], [116.4, 39.9]] }   // 上海 → 北京
+      ]
+    }
+  ]
+});
 
-// 省份TOP10（独立渲染，不依赖地图）
+// 省份TOP10（不依赖地图）
 Dashboard.createChart('bar1', {
   backgroundColor: 'transparent',
   tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
