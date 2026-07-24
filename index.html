@@ -61,10 +61,29 @@ h1 {
 .toolbar a:hover { box-shadow: 0 0 20px rgba(0,212,255,0.4); }
 footer { text-align: center; color: var(--text-secondary); margin-top: 40px; font-size: 12px; }
 </style>
+  <script src="common/dashboard.js"></script>
 </head>
 <body>
+<div class="nav-bar">
+  <a href="components/index.html" class="nav-btn" title="组件库">
+    <span class="icon">🧩</span><span class="label">组件库</span>
+  </a>
+  <a href="https://github.com/littlebest/dashboard-templates" target="_blank" class="nav-btn" title="GitHub">
+    <span class="icon">📦</span><span class="label">GitHub</span>
+  </a>
+</div>
+
+
 <h1>📊 10个行业 20张大屏模板</h1>
 <div class="sub">DASHBOARD TEMPLATE LIBRARY · v1.0</div>
+
+<div class="theme-switcher">
+  <button class="theme-btn" data-theme="default" title="深蓝科技"><span class="dot dot-default"></span><span class="label">Default</span></button>
+  <button class="theme-btn" data-theme="cyber" title="赛博朋克"><span class="dot dot-cyber"></span><span class="label">Cyber</span></button>
+  <button class="theme-btn" data-theme="warm" title="暖橙活力"><span class="dot dot-warm"></span><span class="label">Warm</span></button>
+  <button class="theme-btn" data-theme="minimal" title="极简灰白"><span class="dot dot-minimal"></span><span class="label">Minimal</span></button>
+  <button class="theme-btn" data-theme="auto" title="跟随系统"><span class="dot dot-auto"></span><span class="label">Auto</span></button>
+</div>
 
 <div class="toolbar">
   <a href="components/index.html">🧩 查看通用组件库（8个组件）</a>
