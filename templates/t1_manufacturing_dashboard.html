@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>生产经营驾驶舱 - 制造业</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+body { padding: 20px; }
+.header { text-align: center; margin-bottom: 20px; position: relative; z-index: 1; }
+.header h1 {
+  font-size: 28px;
+  background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 4px;
+}
+.header .sub { font-size: 12px; color: #4a90e2; letter-spacing: 6px; margin-top: 4px; }
+.time { position: fixed; top: 20px; right: 30px; color: #00d4ff; font-family: 'Courier New', monospace; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 180px 220px 220px;
+  gap: 16px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.kpi-card {
+  background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95));
+  border: 1px solid rgba(168,85,247,0.4);
+  border-radius: 8px; padding: 20px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.kpi-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(168,85,247,0.1) 50%, transparent 70%);
+  animation: shimmer 3s infinite;
+}
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.kpi-label { font-size: 13px; color: #8aa0c0; margin-bottom: 8px; position: relative; }
+.kpi-value {
+  font-size: 36px; font-weight: 700;
+  background: linear-gradient(90deg, #00d4ff, #a855f7);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-family: 'Courier New', monospace; position: relative;
+}
+.kpi-unit { font-size: 14px; color: #a855f7; margin-left: 4px; -webkit-text-fill-color: #a855f7; }
+.kpi-trend { font-size: 12px; margin-top: 6px; position: relative; }
+.trend-up { color: #10b981; } .trend-down { color: #ef4444; }
+.chart { width: 100%; height: calc(100% - 30px); }
+</style>
+</head>
+<body>
+<div class="time" id="time"></div>
+<div class="header">
+  <h1>生产经营驾驶舱</h1>
+  <div class="sub">MANUFACTURING CONTROL TOWER</div>
+</div>
+
+<div class="grid">
+  <!-- KPI区 -->
+  <div class="kpi-card">
+    <div class="kpi-label">计划达成率</div>
+    <div class="kpi-value">96.5<span class="kpi-unit">%</span></div>
+    <div class="kpi-trend trend-up">▲ 2.3% 同比</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">良品率</div>
+    <div class="kpi-value">98.7<span class="kpi-unit">%</span></div>
+    <div class="kpi-trend trend-up">▲ 0.8% 提升</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">OEE</div>
+    <div class="kpi-value">85.2<span class="kpi-unit">%</span></div>
+    <div class="kpi-trend trend-up">▲ 3.1% 同比</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">异常工单</div>
+    <div class="kpi-value">12<span class="kpi-unit">单</span></div>
+    <div class="kpi-trend trend-down">▼ 5 单 下降</div>
+  </div>
+
+  <!-- 图表区 -->
+  <div class="card">
+    <div class="card-title">产量趋势（日）</div>
+    <div class="chart" id="c1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">各车间产能</div>
+    <div class="chart" id="c2"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">设备稼动率</div>
+    <div class="chart" id="c3"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">生产异常类型</div>
+    <div class="chart" id="c4"></div>
+  </div>
+
+  <!-- 详情区 -->
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-title">订单交付进度（按产线）</div>
+    <div class="chart" id="c5"></div>
+  </div>
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-title">TOP异常明细</div>
+    <div class="chart" id="c6"></div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+Dashboard.startClock('time');
+const charts = {};
+
+// 1. 产量趋势
+charts.c1 = Dashboard.createChart('c1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: Array.from({length: 30}, (_, i) => `${i+1}日`), ...Dashboard.axisStyle(), axisLabel: { ...Dashboard.axisStyle().axisLabel, fontSize: 9 } },
+  yAxis: { type: 'value', name: '件', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: Array.from({length: 30}, () => Math.floor(Math.random()*200+800)),
+    lineStyle: { color: '#00d4ff', width: 2 },
+    itemStyle: { color: '#00d4ff' },
+    areaStyle: new echarts.graphic.LinearGradient(0,0,0,1,[
+      {offset:0,color:'rgba(0,212,255,0.5)'},
+      {offset:1,color:'rgba(0,212,255,0)'}
+    ])
+  }]
+});
+
+// 2. 各车间产能
+charts.c2 = Dashboard.createChart('c2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { left: '5%', right: '8%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['A车间','B车间','C车间','D车间','E车间'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', name: '件/小时', ...Dashboard.axisStyle() },
+  series: [
+    {
+      name: '计划产能', type: 'bar',
+      data: [150, 180, 160, 200, 170],
+      itemStyle: { color: 'rgba(168,85,247,0.5)', borderRadius: [4,4,0,0] },
+      barWidth: 16
+    },
+    {
+      name: '实际产能', type: 'bar',
+      data: [145, 175, 158, 192, 165],
+      itemStyle: { color: Dashboard.barGradient('#00d4ff'), borderRadius: [4,4,0,0] },
+      barWidth: 16
+    }
+  ]
+});
+
+// 3. 设备稼动率（多仪表）
+charts.c3 = Dashboard.createChart('c3', {
+  backgroundColor: 'transparent',
+  series: ['设备1','设备2','设备3','设备4','设备5','设备6'].map((name, i) => ({
+    type: 'gauge',
+    radius: '32%',
+    center: [`${(i%3)*33+16}%`, `${Math.floor(i/3)*50+30}%`],
+    startAngle: 90, endAngle: -270,
+    progress: { show: true, width: 5, roundCap: true,
+      itemStyle: { color: Dashboard.PALETTE[i] } },
+    axisLine: { lineStyle: { width: 5, color: [[1,'rgba(74,144,226,0.15)']] } },
+    splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false },
+    pointer: { show: false },
+    detail: { valueAnimation: true, fontSize: 14, color: '#fff', formatter: '{c}%', offsetCenter: [0,'0%'] },
+    title: { offsetCenter: [0,'65%'], fontSize: 10, color: Dashboard.TEXT_COLOR },
+    data: [{ value: Math.floor(Math.random()*20+75), name }]
+  }))
+});
+
+// 4. 异常类型
+charts.c4 = Dashboard.createChart('c4', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [{
+    type: 'pie',
+    radius: ['40%','70%'],
+    itemStyle: { borderRadius: 4, borderColor: '#0a1530', borderWidth: 2 },
+    label: { color: '#fff', fontSize: 11 },
+    data: [
+      { value: 35, name: '设备故障', itemStyle: { color: '#ff6b35' } },
+      { value: 25, name: '物料短缺', itemStyle: { color: '#a855f7' } },
+      { value: 18, name: '工艺异常', itemStyle: { color: '#00d4ff' } },
+      { value: 12, name: '人员缺岗', itemStyle: { color: '#f59e0b' } },
+      { value: 10, name: '其他', itemStyle: { color: '#10b981' } }
+    ]
+  }]
+});
+
+// 5. 订单交付进度
+charts.c5 = Dashboard.createChart('c5', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '5%', right: '5%', top: '15%', bottom: '8%' },
+  xAxis: { type: 'category', data: ['PO001','PO002','PO003','PO004','PO005','PO006','PO007','PO008'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [
+    {
+      name: '已完成', type: 'bar', stack: 'total',
+      data: [80, 120, 90, 150, 110, 95, 130, 100],
+      itemStyle: { color: '#10b981' }
+    },
+    {
+      name: '生产中', type: 'bar', stack: 'total',
+      data: [30, 20, 40, 30, 25, 45, 20, 35],
+      itemStyle: { color: '#00d4ff' }
+    },
+    {
+      name: '未开始', type: 'bar', stack: 'total',
+      data: [10, 5, 15, 8, 12, 10, 15, 5],
+      itemStyle: { color: '#f59e0b', borderRadius: [4,4,0,0] }
+    }
+  ]
+});
+
+// 6. TOP异常表格
+charts.c6 = Dashboard.createChart('c6', {
+  backgroundColor: 'transparent',
+  grid: { left: '2%', right: '5%', top: '5%', bottom: '5%', containLabel: true },
+  xAxis: { type: 'value', show: false, max: 100 },
+  yAxis: {
+    type: 'category', inverse: true,
+    data: ['产线A-03设备故障','产线C-物料短缺','产线B-工艺参数异常','产线D-人员缺岗','产线E-质检不合格'],
+    axisLine: { show: false }, axisTick: { show: false },
+    axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 11 }
+  },
+  series: [{
+    type: 'bar', barWidth: 14,
+    data: [88, 72, 65, 58, 45],
+    itemStyle: {
+      borderRadius: [0, 4, 4, 0],
+      color: function(p) {
+        const colors = ['#ef4444','#ff6b35','#f59e0b','#a855f7','#00d4ff'];
+        return new echarts.graphic.LinearGradient(0,0,1,0,[
+          {offset:0,color:colors[p.dataIndex]+'33'},
+          {offset:1,color:colors[p.dataIndex]}
+        ]);
+      }
+    },
+    label: { show: true, position: 'right', formatter: '{c}次', color: '#fff', fontSize: 11 }
+  }]
+});
+</script>
+</body>
+</html>
