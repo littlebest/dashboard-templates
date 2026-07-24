@@ -21,7 +21,7 @@
     <div class="chart" id="c51"></div>
   </div>
   <div class="card">
-    <div class="card-title">3D 饼图（占比）</div>
+    <div class="card-title">3D 玫瑰图（占比）</div>
     <div class="chart" id="c52"></div>
   </div>
 </div>
@@ -61,22 +61,33 @@ Dashboard.createChart('c51', {
   }]
 });
 
-// 2. 3D饼图
+// 2. 3D 玫瑰图（用 bar3D + 极坐标模拟，比 pie3D 更稳）
 Dashboard.createChart('c52', {
   backgroundColor: 'transparent',
-  tooltip: {},
+  tooltip: { trigger: 'item', formatter: '{b}: {c}万' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  polar3D: {},
+  grid3D: {
+    boxWidth: 100, boxDepth: 100,
+    viewControl: { projection: 'orthographic', alpha: 30, beta: 0 },
+    light: { main: { intensity: 1.2 }, ambient: { intensity: 0.5 } }
+  },
+  xAxis3D: { type: 'category', data: ['一线','二线','三线','四线','海外'], axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 11 } },
+  yAxis3D: { type: 'category', data: ['城市分级'], axisLabel: { show: false } },
+  zAxis3D: { type: 'value', axisLabel: { color: Dashboard.TEXT_COLOR } },
   series: [{
-    type: 'pie3D',
-    radius: '60%',
-    center: ['50%', '50%'],
+    type: 'bar3D',
+    coordinateSystem: 'polar3D',
     data: [
-      { name: '一线城市', value: 450, itemStyle: { color: '#00d4ff' } },
-      { name: '二线城市', value: 380, itemStyle: { color: '#a855f7' } },
-      { name: '三线城市', value: 280, itemStyle: { color: '#ff6b35' } },
-      { name: '四线及以下', value: 180, itemStyle: { color: '#10b981' } },
-      { name: '海外', value: 90, itemStyle: { color: '#f59e0b' } }
+      { name: '一线城市', value: [0, 0, 450], itemStyle: { color: '#00d4ff' } },
+      { name: '二线城市', value: [1, 0, 380], itemStyle: { color: '#a855f7' } },
+      { name: '三线城市', value: [2, 0, 280], itemStyle: { color: '#ff6b35' } },
+      { name: '四线及以下', value: [3, 0, 180], itemStyle: { color: '#10b981' } },
+      { name: '海外', value: [4, 0, 90], itemStyle: { color: '#f59e0b' } }
     ],
-    label: { color: '#fff', fontSize: 12 }
+    barSize: 30,
+    shading: 'lambert',
+    label: { show: true, formatter: '{b}\n{c}', color: '#fff', fontSize: 11 }
   }]
 });
 </script>
