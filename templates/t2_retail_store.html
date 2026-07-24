@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>门店经营分析大屏 - 零售</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+body { padding: 20px; }
+.header { text-align: center; margin-bottom: 20px; }
+.header h1 { font-size: 28px; background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 4px; }
+.header .sub { font-size: 12px; color: #4a90e2; letter-spacing: 6px; margin-top: 4px; }
+.time { position: fixed; top: 20px; right: 30px; color: #00d4ff; font-family: 'Courier New', monospace; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 160px 220px 220px; gap: 16px; max-width: 1600px; margin: 0 auto; }
+.kpi-card { background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95)); border: 1px solid rgba(168,85,247,0.4); border-radius: 8px; padding: 18px; text-align: center; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 30%, rgba(168,85,247,0.1) 50%, transparent 70%); animation: shimmer 3s infinite; }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.kpi-label { font-size: 12px; color: #8aa0c0; margin-bottom: 6px; position: relative; }
+.kpi-value { font-size: 32px; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Courier New', monospace; position: relative; }
+.kpi-unit { font-size: 12px; color: #a855f7; margin-left: 4px; -webkit-text-fill-color: #a855f7; }
+.kpi-trend { font-size: 11px; margin-top: 4px; position: relative; }
+.trend-up { color: #10b981; } .trend-down { color: #ef4444; }
+.chart { width: 100%; height: calc(100% - 30px); }
+</style>
+</head>
+<body>
+<div class="time" id="time"></div>
+<div class="header">
+  <h1>门店经营分析大屏</h1>
+  <div class="sub">RETAIL STORE DASHBOARD</div>
+</div>
+
+<div class="grid">
+  <div class="kpi-card"><div class="kpi-label">销售额</div><div class="kpi-value">1286<span class="kpi-unit">万</span></div><div class="kpi-trend trend-up">▲ +12.5%</div></div>
+  <div class="kpi-card"><div class="kpi-label">毛利额</div><div class="kpi-value">380<span class="kpi-unit">万</span></div><div class="kpi-trend trend-up">▲ +8.2%</div></div>
+  <div class="kpi-card"><div class="kpi-label">客流量</div><div class="kpi-value">2.3<span class="kpi-unit">万</span></div><div class="kpi-trend trend-up">▲ +5.1%</div></div>
+  <div class="kpi-card"><div class="kpi-label">坪效</div><div class="kpi-value">85<span class="kpi-unit">元/㎡</span></div><div class="kpi-trend trend-down">▼ -2.3%</div></div>
+
+  <div class="card"><div class="card-title">销售趋势（按门店）</div><div class="chart" id="r1"></div></div>
+  <div class="card"><div class="card-title">各门店毛利排名</div><div class="chart" id="r2"></div></div>
+  <div class="card"><div class="card-title">客单价分布</div><div class="chart" id="r3"></div></div>
+  <div class="card"><div class="card-title">转化漏斗</div><div class="chart" id="r4"></div></div>
+
+  <div class="card" style="grid-column: span 2;"><div class="card-title">费用占比</div><div class="chart" id="r5"></div></div>
+  <div class="card" style="grid-column: span 2;"><div class="card-title">门店利润分布</div><div class="chart" id="r6"></div></div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+Dashboard.startClock('time');
+const charts = {};
+const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月'];
+
+// r1: 多门店销售趋势
+charts.r1 = Dashboard.createChart('r1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '8%', right: '5%', top: '20%', bottom: '10%' },
+  xAxis: { type: 'category', data: MONTHS, ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: ['朝阳店','徐汇店','天河店','南山店'].map((name, i) => ({
+    name, type: 'line', smooth: true,
+    data: Array.from({length:8}, () => Math.floor(Math.random()*100+50+i*30)),
+    lineStyle: { color: Dashboard.PALETTE[i], width: 2 },
+    itemStyle: { color: Dashboard.PALETTE[i] }
+  }))
+});
+
+// r2: 各门店毛利排名
+charts.r2 = Dashboard.createChart('r2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { left: '5%', right: '10%', top: '5%', bottom: '5%', containLabel: true },
+  xAxis: { type: 'value', show: false },
+  yAxis: { type: 'category', inverse: true, data: ['杭州店','西门店','武商店','春熙店','天河店','徐汇店','南山店','朝阳店'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [{
+    type: 'bar', barWidth: 12,
+    data: [35,42,48,55,62,68,75,85],
+    itemStyle: {
+      borderRadius: [0,4,4,0],
+      color: function(p) {
+        const colors = Dashboard.PALETTE;
+        return new echarts.graphic.LinearGradient(0,0,1,0,[
+          {offset:0,color:colors[p.dataIndex%8]+'33'},
+          {offset:1,color:colors[p.dataIndex%8]}
+        ]);
+      }
+    },
+    label: { show: true, position: 'right', formatter: '{c}万', color: '#fff' }
+  }]
+});
+
+// r3: 客单价分布（直方图）
+charts.r3 = Dashboard.createChart('r3', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '8%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['<50','50-100','100-200','200-300','300-500','>500'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'bar', barWidth: 24,
+    data: [120, 280, 450, 320, 180, 85],
+    itemStyle: {
+      color: function(p) {
+        return new echarts.graphic.LinearGradient(0,0,0,1,[
+          {offset:0,color:Dashboard.PALETTE[p.dataIndex]+'CC'},
+          {offset:1,color:Dashboard.PALETTE[p.dataIndex]+'33'}
+        ]);
+      },
+      borderRadius: [4,4,0,0]
+    }
+  }]
+});
+
+// r4: 转化漏斗
+charts.r4 = Dashboard.createChart('r4', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item', formatter: '{b}: {c}%' },
+  series: [{
+    type: 'funnel', left: '10%', right: '10%', top: '5%', bottom: '5%', width: '80%',
+    sort: 'descending', gap: 4,
+    label: { show: true, position: 'inside', color: '#fff', fontSize: 12 },
+    data: [
+      { value: 100, name: '进店 100%', itemStyle: { color: '#00d4ff' } },
+      { value: 75, name: '试穿 75%', itemStyle: { color: '#06b6d4' } },
+      { value: 45, name: '议价 45%', itemStyle: { color: '#a855f7' } },
+      { value: 28, name: '成交 28%', itemStyle: { color: '#ff6b35' } }
+    ]
+  }]
+});
+
+// r5: 费用占比（多维饼图）
+charts.r5 = Dashboard.createChart('r5', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [
+    {
+      name: '费用项', type: 'pie', radius: ['15%','35%'], center: ['50%','45%'],
+      label: { color: '#fff', fontSize: 11 },
+      data: [
+        { value: 30, name: '人工', itemStyle: { color: '#00d4ff' } },
+        { value: 25, name: '租金', itemStyle: { color: '#a855f7' } },
+        { value: 15, name: '水电', itemStyle: { color: '#ff6b35' } },
+        { value: 20, name: '促销', itemStyle: { color: '#10b981' } },
+        { value: 10, name: '其他', itemStyle: { color: '#f59e0b' } }
+      ]
+    },
+    {
+      name: '分类', type: 'pie', radius: ['45%','65%'], center: ['50%','45%'],
+      label: { color: '#fff', fontSize: 11 },
+      data: [
+        { value: 40, name: '固定成本', itemStyle: { color: '#3b82f6' } },
+        { value: 35, name: '变动成本', itemStyle: { color: '#ec4899' } },
+        { value: 25, name: '营销成本', itemStyle: { color: '#06b6d4' } }
+      ]
+    }
+  ]
+});
+
+// r6: 门店利润分布（分组柱状）
+charts.r6 = Dashboard.createChart('r6', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '5%', right: '5%', top: '15%', bottom: '8%' },
+  xAxis: { type: 'category', data: ['朝阳店','徐汇店','天河店','南山店','春熙店','武商店','西门店','杭州店'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [
+    { name: '收入', type: 'bar', data: [180,165,155,148,135,128,118,108], itemStyle: { color: Dashboard.barGradient('#00d4ff'), borderRadius: [4,4,0,0] }, barWidth: 10 },
+    { name: '成本', type: 'bar', data: [120,108,98,95,85,80,75,68], itemStyle: { color: Dashboard.barGradient('#ff6b35'), borderRadius: [4,4,0,0] }, barWidth: 10 },
+    { name: '利润', type: 'bar', data: [60,57,57,53,50,48,43,40], itemStyle: { color: Dashboard.barGradient('#10b981'), borderRadius: [4,4,0,0] }, barWidth: 10 }
+  ]
+});
+</script>
+</body>
+</html>
