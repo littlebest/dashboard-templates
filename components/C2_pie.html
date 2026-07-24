@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C2 - 环形图/饼图</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+  body { padding: 20px; }
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .card-title { color: var(--primary); font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 3px solid var(--secondary); }
+  .chart { width: 100%; height: 280px; }
+</style>
+</head>
+<body>
+<h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C2 - 环形图/饼图</h2>
+<div class="demo-grid">
+  <div class="card">
+    <div class="card-title">单层环形</div>
+    <div class="chart" id="pie1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">双层环形（南丁格尔）</div>
+    <div class="chart" id="pie2"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">玫瑰图</div>
+    <div class="chart" id="pie3"></div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+// 1. 单层环形
+Dashboard.createChart('pie1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  series: [{
+    type: 'pie',
+    radius: ['40%', '70%'],
+    center: ['50%', '45%'],
+    avoidLabelOverlap: true,
+    itemStyle: { borderRadius: 4, borderColor: '#0a1530', borderWidth: 2 },
+    label: { color: '#fff', fontSize: 12 },
+    data: [
+      { value: 1048, name: '搜索引擎', itemStyle: { color: '#00d4ff' } },
+      { value: 735, name: '直接访问', itemStyle: { color: '#a855f7' } },
+      { value: 580, name: '邮件营销', itemStyle: { color: '#ff6b35' } },
+      { value: 484, name: '联盟广告', itemStyle: { color: '#10b981' } },
+      { value: 300, name: '视频广告', itemStyle: { color: '#f59e0b' } }
+    ]
+  }]
+});
+
+// 2. 双层环形
+Dashboard.createChart('pie2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  series: [
+    {
+      name: '渠道',
+      type: 'pie',
+      radius: ['20%', '40%'],
+      center: ['50%', '45%'],
+      label: { color: '#fff' },
+      data: [
+        { value: 335, name: '线上', itemStyle: { color: '#00d4ff' } },
+        { value: 310, name: '线下', itemStyle: { color: '#a855f7' } },
+        { value: 234, name: '代理', itemStyle: { color: '#ff6b35' } }
+      ]
+    },
+    {
+      name: '子渠道',
+      type: 'pie',
+      radius: ['50%', '70%'],
+      center: ['50%', '45%'],
+      label: { color: '#fff' },
+      data: [
+        { value: 120, name: '官网', itemStyle: { color: '#00d4ff' } },
+        { value: 100, name: 'APP', itemStyle: { color: '#06b6d4' } },
+        { value: 115, name: '小程序', itemStyle: { color: '#a855f7' } },
+        { value: 95, name: '门店', itemStyle: { color: '#3b82f6' } },
+        { value: 80, name: '经销商', itemStyle: { color: '#ff6b35' } },
+        { value: 80, name: '批发', itemStyle: { color: '#f59e0b' } },
+        { value: 74, name: '分销', itemStyle: { color: '#10b981' } }
+      ]
+    }
+  ]
+});
+
+// 3. 玫瑰图
+Dashboard.createChart('pie3', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  series: [{
+    type: 'pie',
+    radius: [20, 100],
+    center: ['50%', '45%'],
+    roseType: 'area',
+    itemStyle: { borderRadius: 4 },
+    label: { color: '#fff' },
+    data: Dashboard.PALETTE.map((c,i) => ({
+      value: 40 - i*3, name: `类别${i+1}`, itemStyle: { color: c }
+    }))
+  }]
+});
+</script>
+</body>
+</html>
