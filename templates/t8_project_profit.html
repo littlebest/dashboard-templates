@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>项目利润与回款大屏</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+body { padding: 20px; body { background: linear-gradient(135deg, #f0f4ff 0%, #d9e3f0 100%); color: #1a2a4e; } .card { background: rgba(255,255,255,0.9); border-color: rgba(74,144,226,0.2); } .card-title { color: #1a2a4e; } .kpi-card { background: rgba(255,255,255,0.95); border-color: rgba(74,144,226,0.3); } .kpi-label, .kpi-trend { color: #4a5568; } .kpi-value { background: linear-gradient(90deg, #1a2a4e, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; } .kpi-unit { color: #a855f7; -webkit-text-fill-color: #a855f7; } }
+.header { text-align: center; margin-bottom: 20px; }
+.header h1 { font-size: 28px; background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 4px; }
+.header .sub { font-size: 12px; color: #4a90e2; letter-spacing: 6px; margin-top: 4px; }
+.time { position: fixed; top: 20px; right: 30px; color: #00d4ff; font-family: 'Courier New', monospace; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 160px 220px 220px; gap: 16px; max-width: 1600px; margin: 0 auto; }
+.kpi-card { background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95)); border: 1px solid rgba(168,85,247,0.4); border-radius: 8px; padding: 18px; text-align: center; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 30%, rgba(168,85,247,0.1) 50%, transparent 70%); animation: shimmer 3s infinite; }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.kpi-label { font-size: 12px; color: #8aa0c0; margin-bottom: 6px; position: relative; }
+.kpi-value { font-size: 32px; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Courier New', monospace; position: relative; }
+.kpi-unit { font-size: 12px; color: #a855f7; margin-left: 4px; -webkit-text-fill-color: #a855f7; }
+.kpi-trend { font-size: 11px; margin-top: 4px; position: relative; }
+.trend-up { color: #10b981; } .trend-down { color: #ef4444; }
+.chart { width: 100%; height: calc(100% - 30px); }
+</style>
+</head>
+<body>
+<div class="time" id="time"></div>
+<div class="header">
+  <h1>项目利润与回款大屏</h1>
+  <div class="sub">PROJECT PROFIT</div>
+</div>
+
+<div class="grid">
+  <div class="kpi-card"><div class="kpi-label">合同金额</div><div class="kpi-value">2850<span class="kpi-unit">万</span></div><div class="kpi-trend trend-up">▲ +15%</div></div>
+  <div class="kpi-card"><div class="kpi-label">项目毛利</div><div class="kpi-value">685<span class="kpi-unit">万</span></div><div class="kpi-trend trend-up">▲ +12%</div></div>
+  <div class="kpi-card"><div class="kpi-label">已回款</div><div class="kpi-value">1580<span class="kpi-unit">万</span></div><div class="kpi-trend trend-up">▲ +8%</div></div>
+  <div class="kpi-card"><div class="kpi-label">毛利率</div><div class="kpi-value">24<span class="kpi-unit">%</span></div><div class="kpi-trend trend-up">▲ +1%</div></div>
+
+  <div class="card"><div class="card-title">项目利润对比</div><div class="chart" id="c1"></div></div>
+  <div class="card"><div class="card-title">回款进度</div><div class="chart" id="c2"></div></div>
+  <div class="card"><div class="card-title">收入确认</div><div class="chart" id="c3"></div></div>
+  <div class="card"><div class="card-title">成本结构</div><div class="chart" id="c4"></div></div>
+  <div class="card" style="grid-column: span 2;"><div class="card-title">应收账款</div><div class="chart" id="c5"></div></div>
+  <div class="card" style="grid-column: span 2;"><div class="card-title">项目现金流</div><div class="chart" id="c6"></div></div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+Dashboard.startClock('time');
+const charts = {};
+
+charts.c1 = Dashboard.createChart('c1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '5%', right: '5%', top: '15%', bottom: '8%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [
+    { name: 'A', type: 'bar', data: [120,150,180,220,260,300,340,380], itemStyle: { color: Dashboard.barGradient('#00d4ff'), borderRadius: [4,4,0,0] }, barWidth: 14 },
+    { name: 'B', type: 'bar', data: [80,100,120,150,180,200,230,260], itemStyle: { color: Dashboard.barGradient('#a855f7'), borderRadius: [4,4,0,0] }, barWidth: 14 }
+  ]
+});
+
+charts.c2 = Dashboard.createChart('c2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+
+charts.c3 = Dashboard.createChart('c3', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+
+charts.c4 = Dashboard.createChart('c4', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [{
+    type: 'pie', radius: ['40%','70%'],
+    itemStyle: { borderRadius: 4, borderColor: '#0a1530', borderWidth: 2 },
+    label: { color: '#fff', fontSize: 11 },
+    data: [
+      { value: 35, name: '类别A', itemStyle: { color: '#00d4ff' } },
+      { value: 25, name: '类别B', itemStyle: { color: '#a855f7' } },
+      { value: 20, name: '类别C', itemStyle: { color: '#ff6b35' } },
+      { value: 12, name: '类别D', itemStyle: { color: '#10b981' } },
+      { value: 8, name: '类别E', itemStyle: { color: '#f59e0b' } }
+    ]
+  }]
+});
+
+charts.c5 = Dashboard.createChart('c5', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+
+charts.c6 = Dashboard.createChart('c6', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+</script>
+</body>
+</html>
