@@ -143,16 +143,35 @@ charts.p5 = Dashboard.createChart('p5', {
 // p6: 散点（周转vs动销）
 charts.p6 = Dashboard.createChart('p6', {
   backgroundColor: 'transparent',
-  tooltip: { trigger: 'item', formatter: '{b}<br/>周转: {c[0]}次<br/>动销: {c[1]}%' },
-  grid: { left: '8%', right: '8%', top: '10%', bottom: '10%' },
-  xAxis: { type: 'value', name: '周转率(次)', nameTextStyle: { color: Dashboard.TEXT_COLOR }, ...Dashboard.axisStyle() },
-  yAxis: { type: 'value', name: '动销率(%)', nameTextStyle: { color: Dashboard.TEXT_COLOR }, ...Dashboard.axisStyle() },
+  tooltip: { trigger: 'item', formatter: '{b}<br/>周转率: {c[0]}次<br/>动销率: {c[1]}%' },
+  grid: { left: '8%', right: '8%', top: '15%', bottom: '12%', containLabel: true },
+  xAxis: { type: 'value', name: '周转率(次)', nameTextStyle: { color: Dashboard.TEXT_COLOR, fontSize: 11 }, nameLocation: 'middle', nameGap: 25, ...Dashboard.axisStyle(), min: 0, max: 8 },
+  yAxis: { type: 'value', name: '动销率(%)', nameTextStyle: { color: Dashboard.TEXT_COLOR, fontSize: 11 }, nameLocation: 'middle', nameGap: 35, ...Dashboard.axisStyle(), min: 50, max: 95 },
   series: [{
     type: 'scatter',
-    symbolSize: function(d) { return Math.sqrt(d[2]) * 4; },
-    data: CATS.map((c, i) => [3+i*0.5, 60+i*3, 50+i*10]),
-    itemStyle: { color: Dashboard.PALETTE[i], opacity: 0.8 },
-    label: { show: true, formatter: '{b}', position: 'top', color: '#fff', fontSize: 11 }
+    symbolSize: function(d) { return Math.sqrt(d[2]) * 3 + 8; },
+    data: CATS.map((c, i) => ({
+      name: c,
+      value: [2 + i*0.7, 60 + i*4, 50 + i*15]
+    })),
+    itemStyle: {
+      color: function(p) { return Dashboard.PALETTE[p.dataIndex % 8]; },
+      opacity: 0.85,
+      shadowBlur: 10,
+      shadowColor: 'rgba(0,212,255,0.5)'
+    },
+    label: {
+      show: true,
+      formatter: '{b}',
+      position: 'top',
+      color: '#fff',
+      fontSize: 11,
+      fontWeight: 'bold'
+    },
+    emphasis: {
+      scale: 1.3,
+      label: { fontSize: 13 }
+    }
   }]
 });
 </script>
