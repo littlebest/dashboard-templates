@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>质量管理大屏 - 制造业</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+body { padding: 20px; }
+.header { text-align: center; margin-bottom: 20px; }
+.header h1 { font-size: 28px; background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 4px; }
+.header .sub { font-size: 12px; color: #4a90e2; letter-spacing: 6px; margin-top: 4px; }
+.time { position: fixed; top: 20px; right: 30px; color: #00d4ff; font-family: 'Courier New', monospace; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 160px 220px 220px; gap: 16px; max-width: 1600px; margin: 0 auto; }
+.kpi-card { background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95)); border: 1px solid rgba(168,85,247,0.4); border-radius: 8px; padding: 18px; text-align: center; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 30%, rgba(168,85,247,0.1) 50%, transparent 70%); animation: shimmer 3s infinite; }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.kpi-label { font-size: 12px; color: #8aa0c0; margin-bottom: 6px; position: relative; }
+.kpi-value { font-size: 32px; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Courier New', monospace; position: relative; }
+.kpi-unit { font-size: 12px; color: #a855f7; margin-left: 4px; -webkit-text-fill-color: #a855f7; }
+.kpi-trend { font-size: 11px; margin-top: 4px; position: relative; }
+.trend-up { color: #ef4444; } .trend-down { color: #10b981; }
+.chart { width: 100%; height: calc(100% - 30px); }
+</style>
+</head>
+<body>
+<div class="time" id="time"></div>
+<div class="header">
+  <h1>质量管理大屏</h1>
+  <div class="sub">QUALITY MANAGEMENT DASHBOARD</div>
+</div>
+
+<div class="grid">
+  <div class="kpi-card">
+    <div class="kpi-label">一次合格率</div>
+    <div class="kpi-value">96.2<span class="kpi-unit">%</span></div>
+    <div class="kpi-trend trend-down">▼ 0.3% 下降</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">不良率</div>
+    <div class="kpi-value">3.8<span class="kpi-unit">%</span></div>
+    <div class="kpi-trend trend-up">▲ 0.3% 上升</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">返工率</div>
+    <div class="kpi-value">1.2<span class="kpi-unit">%</span></div>
+    <div class="kpi-trend trend-down">▼ 0.1% 下降</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">客诉数</div>
+    <div class="kpi-value">28<span class="kpi-unit">起</span></div>
+    <div class="kpi-trend trend-down">▼ 5 起 改善</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">质量趋势（月）</div>
+    <div class="chart" id="q1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">不良类型分布</div>
+    <div class="chart" id="q2"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">责任工序 TOP</div>
+    <div class="chart" id="q3"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">质量损失金额</div>
+    <div class="chart" id="q4"></div>
+  </div>
+
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-title">质量等级分布（堆积）</div>
+    <div class="chart" id="q5"></div>
+  </div>
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-title">客诉明细（按产品）</div>
+    <div class="chart" id="q6"></div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+Dashboard.startClock('time');
+const charts = {};
+const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月'];
+
+// 1. 质量趋势
+charts.q1 = Dashboard.createChart('q1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '8%', right: '8%', top: '20%', bottom: '10%' },
+  xAxis: { type: 'category', data: MONTHS, ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', name: '%', ...Dashboard.axisStyle() },
+  series: [
+    { name: '合格率', type: 'line', smooth: true, data: [95.5,96.2,95.8,96.5,97.1,96.8,96.5,96.2], ...Dashboard.lineStyle('#10b981') },
+    { name: '不良率', type: 'line', smooth: true, data: [4.5,3.8,4.2,3.5,2.9,3.2,3.5,3.8], ...Dashboard.lineStyle('#ef4444') }
+  ]
+});
+
+// 2. 不良类型
+charts.q2 = Dashboard.createChart('q2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [{
+    type: 'pie', radius: ['40%','70%'],
+    itemStyle: { borderRadius: 4, borderColor: '#0a1530', borderWidth: 2 },
+    label: { color: '#fff', fontSize: 11 },
+    data: [
+      { value: 32, name: '外观缺陷', itemStyle: { color: '#ff6b35' } },
+      { value: 28, name: '尺寸偏差', itemStyle: { color: '#a855f7' } },
+      { value: 18, name: '功能异常', itemStyle: { color: '#ef4444' } },
+      { value: 12, name: '材料不良', itemStyle: { color: '#f59e0b' } },
+      { value: 10, name: '其他', itemStyle: { color: '#00d4ff' } }
+    ]
+  }]
+});
+
+// 3. 责任工序
+charts.q3 = Dashboard.createChart('q3', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { left: '5%', right: '10%', top: '5%', bottom: '5%', containLabel: true },
+  xAxis: { type: 'value', show: false },
+  yAxis: { type: 'category', inverse: true, data: ['冲压工序','焊接工序','喷涂工序','装配工序','检测工序'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: Dashboard.TEXT_COLOR } },
+  series: [{
+    type: 'bar', barWidth: 14,
+    data: [85, 72, 58, 45, 32],
+    itemStyle: {
+      borderRadius: [0,4,4,0],
+      color: function(p) {
+        const colors = ['#ef4444','#ff6b35','#f59e0b','#a855f7','#00d4ff'];
+        return colors[p.dataIndex];
+      }
+    },
+    label: { show: true, position: 'right', formatter: '{c}起', color: '#fff' }
+  }]
+});
+
+// 4. 质量损失金额（双轴）
+charts.q4 = Dashboard.createChart('q4', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '8%', right: '8%', top: '20%', bottom: '10%' },
+  xAxis: { type: 'category', data: MONTHS, ...Dashboard.axisStyle() },
+  yAxis: [
+    { type: 'value', name: '万元', ...Dashboard.axisStyle() },
+    { type: 'value', name: '占比%', ...Dashboard.axisStyle(), splitLine: { show: false } }
+  ],
+  series: [
+    { name: '损失金额', type: 'bar', data: [12,15,11,9,8,10,12,14], itemStyle: { color: Dashboard.barGradient('#ef4444'), borderRadius: [4,4,0,0] }, barWidth: 16 },
+    { name: '占成本比', type: 'line', yAxisIndex: 1, smooth: true, data: [1.2,1.5,1.1,0.9,0.8,1.0,1.2,1.4], ...Dashboard.lineStyle('#f59e0b', false) }
+  ]
+});
+
+// 5. 质量等级分布
+charts.q5 = Dashboard.createChart('q5', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '5%', right: '5%', top: '15%', bottom: '8%' },
+  xAxis: { type: 'category', data: ['产品A','产品B','产品C','产品D','产品E','产品F','产品G','产品H'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [
+    { name: '优级', type: 'bar', stack: 'total', data: [120,110,135,95,140,125,100,115], itemStyle: { color: '#10b981' } },
+    { name: '良级', type: 'bar', stack: 'total', data: [45,55,40,60,35,50,70,55], itemStyle: { color: '#00d4ff' } },
+    { name: '合格', type: 'bar', stack: 'total', data: [25,20,15,30,15,18,20,22], itemStyle: { color: '#f59e0b' } },
+    { name: '不良', type: 'bar', stack: 'total', data: [10,15,10,15,10,7,10,8], itemStyle: { color: '#ef4444', borderRadius: [4,4,0,0] } }
+  ]
+});
+
+// 6. 客诉明细
+charts.q6 = Dashboard.createChart('q6', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { left: '5%', right: '8%', top: '10%', bottom: '5%' },
+  xAxis: { type: 'category', data: ['产品A','产品B','产品C','产品D','产品E','产品F'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [
+    { name: '本月', type: 'bar', data: [8,5,12,3,7,4], itemStyle: { color: Dashboard.barGradient('#ef4444'), borderRadius: [4,4,0,0] }, barWidth: 18 },
+    { name: '上月', type: 'bar', data: [12,8,15,6,10,7], itemStyle: { color: 'rgba(168,85,247,0.5)', borderRadius: [4,4,0,0] }, barWidth: 18 }
+  ]
+});
+</script>
+</body>
+</html>
