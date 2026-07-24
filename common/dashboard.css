@@ -1,0 +1,83 @@
+/* 公共样式 - 数据大屏深色HUD主题 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: radial-gradient(ellipse at center, #1a2a4e 0%, #0a1530 50%, #050a1c 100%);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+/* HUD网格背景 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(100,180,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,180,255,0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 0;
+}
+/* 卡片 */
+.card {
+  background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95));
+  border: 1px solid rgba(74,144,226,0.3);
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(74,144,226,0.1), inset 0 0 20px rgba(168,85,247,0.05);
+  backdrop-filter: blur(10px);
+}
+.card::before, .card::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #00d4ff;
+}
+.card::before { top: 0; left: 0; border-right: none; border-bottom: none; }
+.card::after { bottom: 0; right: 0; border-left: none; border-top: none; }
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #00d4ff;
+  margin-bottom: 12px;
+  padding-left: 10px;
+  border-left: 3px solid #a855f7;
+  letter-spacing: 2px;
+}
+/* 通用主题色（可被页面覆盖） */
+:root {
+  --primary: #00d4ff;
+  --secondary: #a855f7;
+  --accent: #ff6b35;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text-primary: #fff;
+  --text-secondary: #8aa0c0;
+  --border: rgba(74,144,226,0.3);
+}
+/* 浅色主题（财务/HR类） */
+.theme-light {
+  background: linear-gradient(135deg, #f0f4ff 0%, #d9e3f0 100%);
+  color: #1a2a4e;
+}
+.theme-light .card {
+  background: rgba(255,255,255,0.9);
+  border-color: rgba(74,144,226,0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.theme-light .card-title { color: #1a2a4e; }
+/* 绿色主题（HR/财务） */
+.theme-green {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #1b5e20;
+}
+.theme-green .card { background: rgba(255,255,255,0.95); border-color: rgba(76,175,80,0.3); }
+/* 紫色主题（电商） */
+.theme-purple {
+  background: radial-gradient(ellipse at center, #2d1b4e 0%, #1a0d33 50%, #0a0518 100%);
+}
+.theme-purple .card { border-color: rgba(168,85,247,0.4); }
