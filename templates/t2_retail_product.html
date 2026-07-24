@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>商品销售分析大屏 - 零售</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+body { padding: 20px; }
+.header { text-align: center; margin-bottom: 20px; }
+.header h1 { font-size: 28px; background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 4px; }
+.header .sub { font-size: 12px; color: #4a90e2; letter-spacing: 6px; margin-top: 4px; }
+.time { position: fixed; top: 20px; right: 30px; color: #00d4ff; font-family: 'Courier New', monospace; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 160px 220px 220px; gap: 16px; max-width: 1600px; margin: 0 auto; }
+.kpi-card { background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95)); border: 1px solid rgba(168,85,247,0.4); border-radius: 8px; padding: 18px; text-align: center; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 30%, rgba(168,85,247,0.1) 50%, transparent 70%); animation: shimmer 3s infinite; }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.kpi-label { font-size: 12px; color: #8aa0c0; margin-bottom: 6px; position: relative; }
+.kpi-value { font-size: 32px; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Courier New', monospace; position: relative; }
+.kpi-unit { font-size: 12px; color: #a855f7; margin-left: 4px; -webkit-text-fill-color: #a855f7; }
+.kpi-trend { font-size: 11px; margin-top: 4px; position: relative; }
+.trend-up { color: #10b981; } .trend-down { color: #ef4444; }
+.chart { width: 100%; height: calc(100% - 30px); }
+</style>
+</head>
+<body>
+<div class="time" id="time"></div>
+<div class="header">
+  <h1>商品销售分析大屏</h1>
+  <div class="sub">PRODUCT SALES ANALYSIS</div>
+</div>
+
+<div class="grid">
+  <div class="kpi-card"><div class="kpi-label">商品销售额</div><div class="kpi-value">980<span class="kpi-unit">万</span></div><div class="kpi-trend trend-up">▲ +15.2%</div></div>
+  <div class="kpi-card"><div class="kpi-label">动销率</div><div class="kpi-value">86.5<span class="kpi-unit">%</span></div><div class="kpi-trend trend-up">▲ +3.1%</div></div>
+  <div class="kpi-card"><div class="kpi-label">库存周转</div><div class="kpi-value">5.8<span class="kpi-unit">次</span></div><div class="kpi-trend trend-up">▲ +0.5</div></div>
+  <div class="kpi-card"><div class="kpi-label">缺货率</div><div class="kpi-value">2.8<span class="kpi-unit">%</span></div><div class="kpi-trend trend-down">▼ -0.5%</div></div>
+
+  <div class="card"><div class="card-title">爆品贡献（TOP10）</div><div class="chart" id="p1"></div></div>
+  <div class="card"><div class="card-title">品类销售占比</div><div class="chart" id="p2"></div></div>
+  <div class="card"><div class="card-title">毛利分布</div><div class="chart" id="p3"></div></div>
+  <div class="card"><div class="card-title">滞销商品数</div><div class="chart" id="p4"></div></div>
+
+  <div class="card" style="grid-column: span 2;"><div class="card-title">销量趋势（品类）</div><div class="chart" id="p5"></div></div>
+  <div class="card" style="grid-column: span 2;"><div class="card-title">库存周转 vs 动销率</div><div class="chart" id="p6"></div></div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+Dashboard.startClock('time');
+const charts = {};
+const CATS = ['手机','电脑','服装','食品','家电','图书','美妆','运动'];
+
+// p1: 爆品TOP10
+charts.p1 = Dashboard.createChart('p1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { left: '5%', right: '10%', top: '5%', bottom: '5%', containLabel: true },
+  xAxis: { type: 'value', show: false },
+  yAxis: { type: 'category', inverse: true, data: ['P09','P08','P07','P06','P05','P04','P03','P02','P01'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [{
+    type: 'bar', barWidth: 12,
+    data: [85, 78, 72, 65, 58, 52, 45, 38, 32],
+    itemStyle: {
+      borderRadius: [0,4,4,0],
+      color: function(p) {
+        const colors = Dashboard.PALETTE;
+        return new echarts.graphic.LinearGradient(0,0,1,0,[
+          {offset:0,color:colors[p.dataIndex%8]+'33'},
+          {offset:1,color:colors[p.dataIndex%8]}
+        ]);
+      }
+    },
+    label: { show: true, position: 'right', formatter: '{c}万', color: '#fff' }
+  }]
+});
+
+// p2: 品类占比
+charts.p2 = Dashboard.createChart('p2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [{
+    type: 'pie', radius: ['40%','70%'],
+    itemStyle: { borderRadius: 4, borderColor: '#0a1530', borderWidth: 2 },
+    label: { color: '#fff', fontSize: 11 },
+    data: CATS.map((c, i) => ({ value: [280,250,180,150,120,90,80,70][i], name: c, itemStyle: { color: Dashboard.PALETTE[i] } }))
+  }]
+});
+
+// p3: 毛利分布（双饼）
+charts.p3 = Dashboard.createChart('p3', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [{
+    type: 'pie', radius: ['30%','70%'], roseType: 'radius',
+    itemStyle: { borderRadius: 4 },
+    label: { color: '#fff', fontSize: 10 },
+    data: CATS.map((c, i) => ({ value: 80 - i*8, name: c, itemStyle: { color: Dashboard.PALETTE[i] } }))
+  }]
+});
+
+// p4: 滞销商品数（仪表）
+charts.p4 = Dashboard.createChart('p4', {
+  backgroundColor: 'transparent',
+  series: [
+    { name: '滞销', type: 'gauge', radius: '40%', center: ['50%','50%'],
+      startAngle: 200, endAngle: -20,
+      progress: { show: true, width: 14,
+        itemStyle: { color: new echarts.graphic.LinearGradient(0,0,1,0,[
+          {offset:0,color:'#f59e0b'},{offset:1,color:'#ef4444'}]) } },
+      axisLine: { lineStyle: { width: 14, color: [[1,'rgba(74,144,226,0.15)']] } },
+      pointer: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
+      anchor: { show: false },
+      detail: { valueAnimation: true, fontSize: 32, color: '#fff', formatter: '{value}', offsetCenter: [0,'10%'] },
+      title: { offsetCenter: [0,'45%'], fontSize: 12, color: Dashboard.TEXT_COLOR },
+      data: [{ value: 156, name: '滞销商品数' }]
+    }
+  ]
+});
+
+// p5: 销量趋势
+charts.p5 = Dashboard.createChart('p5', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
+  grid: { left: '5%', right: '5%', top: '15%', bottom: '8%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: CATS.slice(0,4).map((c, i) => ({
+    name: c, type: 'line', smooth: true,
+    data: Array.from({length:8}, (_,j) => Math.floor(Math.random()*100+50+i*40+j*5)),
+    lineStyle: { color: Dashboard.PALETTE[i], width: 2 },
+    itemStyle: { color: Dashboard.PALETTE[i] },
+    areaStyle: i<2 ? new echarts.graphic.LinearGradient(0,0,0,1,[
+      {offset:0,color:Dashboard.PALETTE[i]+'44'},
+      {offset:1,color:Dashboard.PALETTE[i]+'00'}
+    ]) : undefined
+  }))
+});
+
+// p6: 散点（周转vs动销）
+charts.p6 = Dashboard.createChart('p6', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item', formatter: '{b}<br/>周转: {c[0]}次<br/>动销: {c[1]}%' },
+  grid: { left: '8%', right: '8%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'value', name: '周转率(次)', nameTextStyle: { color: Dashboard.TEXT_COLOR }, ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', name: '动销率(%)', nameTextStyle: { color: Dashboard.TEXT_COLOR }, ...Dashboard.axisStyle() },
+  series: [{
+    type: 'scatter',
+    symbolSize: function(d) { return Math.sqrt(d[2]) * 4; },
+    data: CATS.map((c, i) => [3+i*0.5, 60+i*3, 50+i*10]),
+    itemStyle: { color: Dashboard.PALETTE[i], opacity: 0.8 },
+    label: { show: true, formatter: '{b}', position: 'top', color: '#fff', fontSize: 11 }
+  }]
+});
+</script>
+</body>
+</html>
