@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C5 - 3D柱状图</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+  body { padding: 20px; }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1200px; margin: 0 auto; }
+  .card-title { color: var(--primary); font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 3px solid var(--secondary); }
+  .chart { width: 100%; height: 380px; }
+</style>
+</head>
+<body>
+<h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C5 - 3D柱状图</h2>
+<div class="demo-grid">
+  <div class="card">
+    <div class="card-title">3D 柱状图（销量×品类×月份）</div>
+    <div class="chart" id="c51"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">3D 饼图（占比）</div>
+    <div class="chart" id="c52"></div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+// 1. 3D柱状图
+Dashboard.createChart('c51', {
+  backgroundColor: 'transparent',
+  tooltip: {},
+  visualMap: {
+    max: 30, min: 0, dimension: 2,
+    inRange: { color: ['#00d4ff', '#a855f7', '#ff6b35'] },
+    textStyle: { color: Dashboard.TEXT_COLOR },
+    calculable: true,
+    orient: 'vertical', right: 0, top: 'center'
+  },
+  xAxis3D: { type: 'category', data: ['1月','2月','3月','4月','5月','6月'], axisLabel: { color: Dashboard.TEXT_COLOR } },
+  yAxis3D: { type: 'category', data: ['手机','电脑','服装','食品'], axisLabel: { color: Dashboard.TEXT_COLOR } },
+  zAxis3D: { type: 'value', axisLabel: { color: Dashboard.TEXT_COLOR } },
+  grid3D: {
+    boxWidth: 200, boxDepth: 120, viewControl: { projection: 'orthographic' },
+    light: { main: { intensity: 1.2 }, ambient: { intensity: 0.3 } }
+  },
+  series: [{
+    type: 'bar3D',
+    data: [
+      ['1月','手机',25],['1月','电脑',18],['1月','服装',12],['1月','食品',8],
+      ['2月','手机',22],['2月','电脑',20],['2月','服装',15],['2月','食品',10],
+      ['3月','手机',28],['3月','电脑',22],['3月','服装',18],['3月','食品',12],
+      ['4月','手机',30],['4月','电脑',25],['4月','服装',20],['4月','食品',15],
+      ['5月','手机',26],['5月','电脑',23],['5月','服装',22],['5月','食品',14],
+      ['6月','手机',32],['6月','电脑',28],['6月','服装',25],['6月','食品',18]
+    ].map(d => ({ value: [d[0], d[1], d[2]] })),
+    shading: 'lambert',
+    label: { show: false }
+  }]
+});
+
+// 2. 3D饼图
+Dashboard.createChart('c52', {
+  backgroundColor: 'transparent',
+  tooltip: {},
+  series: [{
+    type: 'pie3D',
+    radius: '60%',
+    center: ['50%', '50%'],
+    data: [
+      { name: '一线城市', value: 450, itemStyle: { color: '#00d4ff' } },
+      { name: '二线城市', value: 380, itemStyle: { color: '#a855f7' } },
+      { name: '三线城市', value: 280, itemStyle: { color: '#ff6b35' } },
+      { name: '四线及以下', value: 180, itemStyle: { color: '#10b981' } },
+      { name: '海外', value: 90, itemStyle: { color: '#f59e0b' } }
+    ],
+    label: { color: '#fff', fontSize: 12 }
+  }]
+});
+</script>
+</body>
+</html>
