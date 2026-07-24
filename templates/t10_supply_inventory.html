@@ -2,16 +2,16 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>库存健康分析大屏</title>
+<title>库存健康分析大屏 - 供应链</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <link rel="stylesheet" href="../common/dashboard.css">
 <style>
-body { padding: 20px; body { background: linear-gradient(135deg, #f0f4ff 0%, #d9e3f0 100%); color: #1a2a4e; } .card { background: rgba(255,255,255,0.9); border-color: rgba(74,144,226,0.2); } .card-title { color: #1a2a4e; } .kpi-card { background: rgba(255,255,255,0.95); border-color: rgba(74,144,226,0.3); } .kpi-label, .kpi-trend { color: #4a5568; } .kpi-value { background: linear-gradient(90deg, #1a2a4e, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; } .kpi-unit { color: #a855f7; -webkit-text-fill-color: #a855f7; } }
+body { padding: 20px; }
 .header { text-align: center; margin-bottom: 20px; }
 .header h1 { font-size: 28px; background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 4px; }
 .header .sub { font-size: 12px; color: #4a90e2; letter-spacing: 6px; margin-top: 4px; }
 .time { position: fixed; top: 20px; right: 30px; color: #00d4ff; font-family: 'Courier New', monospace; }
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 160px 220px 220px; gap: 16px; max-width: 1600px; margin: 0 auto; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 160px 320px 220px; gap: 16px; max-width: 1600px; margin: 0 auto; }
 .kpi-card { background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95)); border: 1px solid rgba(168,85,247,0.4); border-radius: 8px; padding: 18px; text-align: center; position: relative; overflow: hidden; }
 .kpi-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 30%, rgba(168,85,247,0.1) 50%, transparent 70%); animation: shimmer 3s infinite; }
 @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
@@ -21,132 +21,479 @@ body { padding: 20px; body { background: linear-gradient(135deg, #f0f4ff 0%, #d9
 .kpi-trend { font-size: 11px; margin-top: 4px; position: relative; }
 .trend-up { color: #10b981; } .trend-down { color: #ef4444; }
 .chart { width: 100%; height: calc(100% - 30px); }
+.chart-large { width: 100%; height: calc(100% - 50px); }
+.detail-panel {
+  position: fixed;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 80%; max-width: 700px;
+  background: linear-gradient(135deg, rgba(22,33,62,0.98), rgba(15,25,50,0.98));
+  border: 2px solid #00d4ff;
+  border-radius: 12px;
+  padding: 24px;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 0 60px rgba(0,212,255,0.4);
+}
+.detail-panel.active { display: block; }
+.detail-panel h3 {
+  color: #00d4ff;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(74,144,226,0.3);
+}
+.detail-panel .close-btn {
+  position: absolute; top: 16px; right: 16px;
+  width: 30px; height: 30px;
+  background: rgba(239,68,68,0.2);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.detail-panel .close-btn:hover { background: rgba(239,68,68,0.4); }
+.detail-table { width: 100%; border-collapse: collapse; font-size: 12px; color: #fff; }
+.detail-table th { background: rgba(0,212,255,0.15); padding: 8px; text-align: left; color: #00d4ff; }
+.detail-table td { padding: 6px 8px; border-bottom: 1px solid rgba(74,144,226,0.15); }
+.detail-table tr:hover { background: rgba(168,85,247,0.1); }
+.detail-table .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; }
+.tag-normal { background: #10b981; color: #fff; }
+.tag-turnover { background: #00d4ff; color: #000; }
+.tag-warning { background: #f59e0b; color: #000; }
+.tag-stagnant { background: #ef4444; color: #fff; }
 </style>
 </head>
 <body>
 <div class="time" id="time"></div>
 <div class="header">
   <h1>库存健康分析大屏</h1>
-  <div class="sub">INVENTORY HEALTH</div>
+  <div class="sub">INVENTORY HEALTH DASHBOARD</div>
+</div>
+
+<!-- 详情面板（点击Treemap叶子触发） -->
+<div id="detailPanel" class="detail-panel">
+  <button class="close-btn" onclick="closeDetail()">×</button>
+  <h3 id="detailTitle">SKU 明细</h3>
+  <div id="detailContent"></div>
 </div>
 
 <div class="grid">
+  <!-- KPI区 -->
   <div class="kpi-card"><div class="kpi-label">库存金额</div><div class="kpi-value">2850<span class="kpi-unit">万</span></div><div class="kpi-trend trend-up">▲ +5.2%</div></div>
   <div class="kpi-card"><div class="kpi-label">周转率</div><div class="kpi-value">6.8<span class="kpi-unit">次</span></div><div class="kpi-trend trend-up">▲ +0.5</div></div>
   <div class="kpi-card"><div class="kpi-label">呆滞库存</div><div class="kpi-value">180<span class="kpi-unit">万</span></div><div class="kpi-trend trend-down">▼ -12%</div></div>
   <div class="kpi-card"><div class="kpi-label">缺货率</div><div class="kpi-value">3.5<span class="kpi-unit">%</span></div><div class="kpi-trend trend-down">▼ -1%</div></div>
 
-  <div class="card"><div class="card-title">库存金额趋势</div><div class="chart" id="c1"></div></div>
-  <div class="card"><div class="card-title">库龄分布</div><div class="chart" id="c2"></div></div>
+  <!-- 主图：库存Treemap（占2列） -->
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-title">📦 库存结构占用图（点击矩形查看SKU明细）</div>
+    <div class="chart-large" id="treemap"></div>
+  </div>
+
+  <!-- 右侧辅助图 -->
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-title">📊 库龄分布 + 出入库流量</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: calc(100% - 30px);">
+      <div class="chart" id="c1"></div>
+      <div class="chart" id="c2"></div>
+    </div>
+  </div>
+
+  <!-- 第二行 -->
   <div class="card"><div class="card-title">呆滞TOP10</div><div class="chart" id="c3"></div></div>
-  <div class="card"><div class="card-title">出入库流量</div><div class="chart" id="c4"></div></div>
-  <div class="card" style="grid-column: span 2;"><div class="card-title">安全库存覆盖率</div><div class="chart" id="c5"></div></div>
-  <div class="card" style="grid-column: span 2;"><div class="card-title">品类周转排名</div><div class="chart" id="c6"></div></div>
+  <div class="card"><div class="card-title">安全库存覆盖率</div><div class="chart" id="c4"></div></div>
+  <div class="card"><div class="card-title">出入库流量</div><div class="chart" id="c5"></div></div>
+  <div class="card"><div class="card-title">品类周转排名</div><div class="chart" id="c6"></div></div>
 </div>
 
 <script src="../common/dashboard.js"></script>
 <script>
 Dashboard.startClock('time');
 const charts = {};
+const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月'];
 
-charts.c1 = Dashboard.createChart('c1', {
-  backgroundColor: 'transparent',
-  tooltip: { trigger: 'axis' },
-  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR } },
-  grid: { left: '8%', right: '5%', top: '20%', bottom: '10%' },
-  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
-  yAxis: { type: 'value', ...Dashboard.axisStyle() },
-  series: [
-    { name: '本期', type: 'line', smooth: true, data: [320,280,350,410,380,450,420,480], ...Dashboard.lineStyle('#00d4ff') },
-    { name: '同期', type: 'line', smooth: true, data: [280,250,310,360,340,400,380,430], lineStyle: { color: '#a855f7', width: 2, type: 'dashed' } }
+// ========== Treemap 库存结构 ==========
+const statusColor = {
+  'normal': '#10b981',     // 绿色 - 正常
+  'turnover': '#00d4ff',   // 青色 - 周转
+  'warning': '#f59e0b',    // 橙色 - 警告
+  'stagnant': '#ef4444'    // 红色 - 呆滞
+};
+const statusName = {
+  'normal': '正常(<30天)',
+  'turnover': '周转(30-90天)',
+  'warning': '预警(90-180天)',
+  'stagnant': '呆滞(>180天)'
+};
+
+// 真实SKU数据（点击触发详情）
+const treeData = {
+  name: '总库存',
+  value: 2850,
+  children: [
+    {
+      name: 'A 仓库', value: 920,
+      children: [
+        {
+          name: '电子产品', value: 480,
+          children: [
+            { name: 'iPhone 15', value: 220, days: 45, status: 'turnover', sku: 'A-PHONE-001',
+              details: { stock: 320, sold7d: 85, price: 5999, supplier: '苹果直供', lastIn: '2026-07-15' } },
+            { name: 'MacBook Air', value: 160, days: 60, status: 'turnover', sku: 'A-MBA-002',
+              details: { stock: 180, sold7d: 35, price: 8999, supplier: '苹果直供', lastIn: '2026-06-30' } },
+            { name: '数据线/壳膜', value: 100, days: 30, status: 'normal', sku: 'A-ACC-003',
+              details: { stock: 2500, sold7d: 420, price: 49, supplier: '倍思', lastIn: '2026-07-22' } }
+          ]
+        },
+        {
+          name: '服装鞋帽', value: 440,
+          children: [
+            { name: '男装', value: 200, days: 75, status: 'turnover', sku: 'A-MEN-004',
+              details: { stock: 850, sold7d: 95, price: 299, supplier: '海澜之家', lastIn: '2026-06-25' } },
+            { name: '女装', value: 180, days: 120, status: 'warning', sku: 'A-WOM-005',
+              details: { stock: 620, sold7d: 42, price: 399, supplier: 'ONLY', lastIn: '2026-05-15' } },
+            { name: '运动鞋', value: 60, days: 90, status: 'turnover', sku: 'A-SHOE-006',
+              details: { stock: 240, sold7d: 28, price: 599, supplier: '耐克', lastIn: '2026-06-20' } }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'B 仓库', value: 1180,
+      children: [
+        {
+          name: '家电', value: 580,
+          children: [
+            { name: '空调', value: 320, days: 50, status: 'turnover', sku: 'B-AC-007',
+              details: { stock: 180, sold7d: 32, price: 3299, supplier: '美的', lastIn: '2026-07-10' } },
+            { name: '小家电', value: 180, days: 35, status: 'normal', sku: 'B-SMA-008',
+              details: { stock: 480, sold7d: 68, price: 199, supplier: '小熊电器', lastIn: '2026-07-18' } },
+            { name: '厨电(呆滞!)', value: 80, days: 200, status: 'stagnant', sku: 'B-KIT-009',
+              details: { stock: 95, sold7d: 2, price: 899, supplier: '九阳', lastIn: '2026-01-05' } }
+          ]
+        },
+        {
+          name: '日用百货', value: 600,
+          children: [
+            { name: '家居', value: 280, days: 40, status: 'normal', sku: 'B-HOM-010',
+              details: { stock: 1200, sold7d: 145, price: 89, supplier: '名创优品', lastIn: '2026-07-15' } },
+            { name: '美妆', value: 220, days: 25, status: 'normal', sku: 'B-COS-011',
+              details: { stock: 680, sold7d: 92, price: 159, supplier: '完美日记', lastIn: '2026-07-20' } },
+            { name: '清洁用品', value: 100, days: 150, status: 'warning', sku: 'B-CLN-012',
+              details: { stock: 320, sold7d: 18, price: 39, supplier: '蓝月亮', lastIn: '2026-04-10' } }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'C 仓库', value: 750,
+      children: [
+        {
+          name: '食品饮料', value: 380,
+          children: [
+            { name: '零食', value: 180, days: 20, status: 'normal', sku: 'C-SNK-013',
+              details: { stock: 850, sold7d: 180, price: 25, supplier: '三只松鼠', lastIn: '2026-07-22' } },
+            { name: '饮料', value: 140, days: 15, status: 'normal', sku: 'C-DRK-014',
+              details: { stock: 1200, sold7d: 220, price: 4, supplier: '农夫山泉', lastIn: '2026-07-23' } },
+            { name: '生鲜', value: 60, days: 5, status: 'normal', sku: 'C-FRS-015',
+              details: { stock: 280, sold7d: 95, price: 18, supplier: '本地直采', lastIn: '2026-07-24' } }
+          ]
+        },
+        {
+          name: '图书文具', value: 370,
+          children: [
+            { name: '图书(高危呆滞)', value: 220, days: 220, status: 'stagnant', sku: 'C-BOK-016',
+              details: { stock: 1850, sold7d: 5, price: 49, supplier: '新华书店', lastIn: '2025-12-20' } },
+            { name: '文具', value: 100, days: 80, status: 'turnover', sku: 'C-STA-017',
+              details: { stock: 920, sold7d: 75, price: 15, supplier: '晨光', lastIn: '2026-06-30' } },
+            { name: '办公', value: 50, days: 40, status: 'normal', sku: 'C-OFF-018',
+              details: { stock: 280, sold7d: 28, price: 89, supplier: '得力', lastIn: '2026-07-12' } }
+          ]
+        }
+      ]
+    }
   ]
+};
+
+// 颜色丰富化 + 灰度变体
+const grayColor = {
+  'normal': '#6b7280',     // 灰 - 不活跃
+  'turnover': '#9ca3af',   // 浅灰 - 慢周转
+  'warning': '#d1d5db',    // 更浅灰 - 预警
+  'stagnant': '#e5e7eb'    // 最浅灰 - 严重
+};
+
+charts.treemap = Dashboard.createChart('treemap', {
+  backgroundColor: 'transparent',
+  tooltip: {
+    backgroundColor: 'rgba(15,25,50,0.95)',
+    borderColor: '#00d4ff',
+    borderWidth: 1,
+    textStyle: { color: '#fff' },
+    formatter: function(info) {
+      const d = info.data;
+      if (!d) return '';
+      const path = info.treePathInfo.map(p => p.name).join(' / ');
+      const tag = d.status ? `<span class="tag" style="background:${statusColor[d.status]}">${statusName[d.status]}</span>` : '';
+      return `<div style="font-size:13px; line-height:1.6;">
+        <b style="color:#00d4ff">${info.name}</b> ${tag}<br/>
+        <span style="color:#8aa0c0">路径：</span>${path}<br/>
+        <span style="color:#8aa0c0">库存：</span><b>${d.value}万</b><br/>
+        ${d.days !== undefined ? `<span style="color:#8aa0c0">库龄：</span>${d.days}天` : ''}
+        ${d.sku ? `<br/><span style="color:#8aa0c0">SKU：</span>${d.sku}` : ''}
+        <br/><span style="color:#f59e0b;font-size:11px">💡 点击查看明细</span>
+      </div>`;
+    }
+  },
+  series: [{
+    type: 'treemap',
+    data: [treeData],
+    roam: false,
+    nodeClick: 'zoomToNode',  // 启用点击钻取
+    width: '100%',
+    height: '100%',
+    breadcrumb: {
+      show: true,
+      bottom: 5,
+      itemStyle: {
+        color: 'rgba(22,33,62,0.9)',
+        borderColor: '#00d4ff',
+        textStyle: { color: '#fff' }
+      }
+    },
+    label: {
+      show: true,
+      formatter: function(params) {
+        const d = params.data;
+        if (d.days !== undefined) {
+          return `{name|${params.name}}\n{value|${d.value}万 · ${d.days}天}`;
+        }
+        return `{name|${params.name}}\n{value|${d.value}万}`;
+      },
+      rich: {
+        name: { color: '#fff', fontSize: 12, fontWeight: 'bold', textShadowColor: '#000', textShadowBlur: 3 },
+        value: { color: 'rgba(255,255,255,0.85)', fontSize: 10, fontFamily: 'Courier New' }
+      }
+    },
+    upperLabel: {
+      show: true,
+      height: 28,
+      color: '#fff',
+      fontSize: 13,
+      fontWeight: 'bold',
+      textBorderColor: '#000',
+      textBorderWidth: 2
+    },
+    itemStyle: {
+      borderColor: '#0a1530',
+      borderWidth: 2,
+      gapWidth: 3
+    },
+    emphasis: {
+      upperLabel: { show: true },
+      label: { fontSize: 14, fontWeight: 'bold' },
+      itemStyle: {
+        shadowBlur: 20,
+        shadowColor: 'rgba(0,212,255,0.6)'
+      }
+    },
+    levels: [
+      {
+        // 根节点
+        itemStyle: {
+          borderColor: '#00d4ff', borderWidth: 3, gapWidth: 10,
+          color: '#1a2a4e'
+        },
+        upperLabel: { show: false }
+      },
+      {
+        // 仓库级
+        itemStyle: {
+          borderColor: '#a855f7', borderWidth: 2, gapWidth: 6,
+          color: '#2d1b4e'
+        },
+        upperLabel: { show: true, height: 26 }
+      },
+      {
+        // 品类级
+        itemStyle: {
+          borderColor: '#ff6b35', borderWidth: 1.5, gapWidth: 4,
+          color: '#3d2b1e'
+        },
+        upperLabel: { show: true, height: 22 }
+      },
+      {
+        // 叶子（具体商品）- 按状态着色，含灰度变体
+        itemStyle: {
+          borderColor: '#0a1530', borderWidth: 1, gapWidth: 1
+        }
+      }
+    ],
+    dataFilter: function(node) {
+      // 修复bug：必须return node
+      if (!node.children && node.data && node.data.status) {
+        node.data.itemStyle = {
+          color: statusColor[node.data.status],
+          borderColor: 'rgba(255,255,255,0.3)',
+          borderWidth: 1,
+          gapWidth: 1
+        };
+      }
+      return node;
+    }
+  }]
 });
 
+// ========== 点击叶子节点 → 显示详情面板 ==========
+charts.treemap.on('click', function(params) {
+  if (!params.data) return;
+  const d = params.data;
+  // 只对叶子节点（有sku的）触发详情
+  if (!d.sku) return;
+
+  document.getElementById('detailTitle').textContent = `${d.name} (${d.sku})`;
+  const det = d.details || {};
+  document.getElementById('detailContent').innerHTML = `
+    <table class="detail-table">
+      <tr><th>字段</th><th>数值</th></tr>
+      <tr><td>SKU编码</td><td>${d.sku}</td></tr>
+      <tr><td>商品名称</td><td>${d.name}</td></tr>
+      <tr><td>当前库存数量</td><td>${det.stock || '-'} 件</td></tr>
+      <tr><td>库存金额</td><td><b>${d.value}万</b></td></tr>
+      <tr><td>7天销量</td><td>${det.sold7d || '-'} 件</td></tr>
+      <tr><td>最近入库</td><td>${det.lastIn || '-'}</td></tr>
+      <tr><td>库龄</td><td>${d.days}天</td></tr>
+      <tr><td>状态</td><td><span class="tag tag-${d.status}">${statusName[d.status]}</span></td></tr>
+      <tr><td>单价</td><td>${det.price || '-'} 元</td></tr>
+      <tr><td>供应商</td><td>${det.supplier || '-'}</td></tr>
+    </table>
+    <div style="margin-top: 16px; padding: 12px; background: rgba(0,212,255,0.1); border-radius: 6px; font-size: 12px;">
+      <b style="color:#00d4ff">📈 智能建议：</b><br/>
+      ${d.status === 'stagnant' ? '<span style="color:#ef4444">⚠️ 库存严重积压，建议立即促销清仓或调拨至其他仓库</span>' :
+        d.status === 'warning' ? '<span style="color:#f59e0b">⏰ 库存周转偏慢，建议加大推广力度或捆绑销售</span>' :
+        d.status === 'turnover' ? '<span style="color:#00d4ff">✅ 周转正常，保持当前补货节奏</span>' :
+        '<span style="color:#10b981">🔥 库存健康，可考虑补货</span>'}
+    </div>
+  `;
+  document.getElementById('detailPanel').classList.add('active');
+});
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('active');
+}
+// ESC关闭
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+// ========== 库龄分布 (c1) - 替换为更丰富的版本 ==========
+charts.c1 = Dashboard.createChart('c1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  series: [{
+    type: 'pie', radius: ['35%', '65%'],
+    itemStyle: { borderRadius: 4, borderColor: '#0a1530', borderWidth: 2 },
+    label: { color: '#fff', fontSize: 11 },
+    data: [
+      { value: 420, name: '<30天 (正常)', itemStyle: { color: '#10b981' } },
+      { value: 980, name: '30-90天 (周转)', itemStyle: { color: '#00d4ff' } },
+      { value: 670, name: '90-180天 (预警)', itemStyle: { color: '#f59e0b' } },
+      { value: 280, name: '180-365天 (呆滞)', itemStyle: { color: '#ef4444' } },
+      { value: 200, name: '>365天 (报废)', itemStyle: { color: '#9ca3af' } },
+      { value: 100, name: '临期 (≤7天)', itemStyle: { color: '#a855f7' } }
+    ]
+  }]
+});
+
+// ========== 出入库流量 (c2) ==========
 charts.c2 = Dashboard.createChart('c2', {
   backgroundColor: 'transparent',
   tooltip: { trigger: 'axis' },
-  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
-  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  legend: { top: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  grid: { left: '5%', right: '5%', top: '20%', bottom: '12%' },
+  xAxis: { type: 'category', data: MONTHS, ...Dashboard.axisStyle(), axisLabel: { ...Dashboard.axisStyle().axisLabel, fontSize: 10 } },
   yAxis: { type: 'value', ...Dashboard.axisStyle() },
-  series: [{
-    type: 'line', smooth: true,
-    data: [120,135,128,148,162,155,178,185],
-    ...Dashboard.lineStyle('#00d4ff')
-  }]
+  series: [
+    { name: '入库', type: 'bar', data: [320,280,350,410,380,450,420,480], itemStyle: { color: Dashboard.barGradient('#00d4ff'), borderRadius: [4,4,0,0] }, barWidth: 12 },
+    { name: '出库', type: 'bar', data: [280,250,310,360,340,400,380,430], itemStyle: { color: Dashboard.barGradient('#ff6b35'), borderRadius: [4,4,0,0] }, barWidth: 12 },
+    { name: '净流量', type: 'line', smooth: true, data: [40,30,40,50,40,50,40,50], ...Dashboard.lineStyle('#10b981', false) }
+  ]
 });
 
+// ========== 呆滞TOP10 (c3) ==========
 charts.c3 = Dashboard.createChart('c3', {
   backgroundColor: 'transparent',
   tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-  grid: { left: '5%', right: '10%', top: '5%', bottom: '5%', containLabel: true },
+  grid: { left: '5%', right: '12%', top: '5%', bottom: '5%', containLabel: true },
   xAxis: { type: 'value', show: false },
-  yAxis: { type: 'category', inverse: true, data: ['项目A','项目B','项目C','项目D','项目E','项目F','项目G','项目H'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  yAxis: { type: 'category', inverse: true, data: ['图书-字典','厨电-豆浆机','女装-外套','清洁-消毒液','女装-连衣裙','厨电-电饼铛','男装-衬衫','鞋类-凉鞋','家电-风扇','家居-收纳'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
   series: [{
     type: 'bar', barWidth: 12,
-    data: [85,78,72,65,58,52,45,38],
+    data: [85,72,65,58,52,48,45,42,38,35],
     itemStyle: {
       borderRadius: [0,4,4,0],
       color: function(p) {
-        const colors = Dashboard.PALETTE;
-        return new echarts.graphic.LinearGradient(0,0,1,0,[
-          {offset:0,color:colors[p.dataIndex%8]+'33'},
-          {offset:1,color:colors[p.dataIndex%8]}
-        ]);
+        // 灰度变体 - 越深越严重
+        const grays = ['#ef4444','#f87171','#fca5a5','#9ca3af','#9ca3af','#9ca3af','#9ca3af','#9ca3af','#9ca3af','#9ca3af'];
+        return grays[p.dataIndex];
       }
     },
-    label: { show: true, position: 'right', formatter: '{c}', color: '#fff' }
+    label: { show: true, position: 'right', formatter: '{c}万', color: '#fff', fontSize: 10 }
   }]
 });
 
+// ========== 安全库存覆盖率 (c4) - 仪表盘组 ==========
 charts.c4 = Dashboard.createChart('c4', {
   backgroundColor: 'transparent',
-  tooltip: { trigger: 'axis' },
-  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
-  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
-  yAxis: { type: 'value', ...Dashboard.axisStyle() },
-  series: [{
-    type: 'line', smooth: true,
-    data: [120,135,128,148,162,155,178,185],
-    ...Dashboard.lineStyle('#00d4ff')
-  }]
+  series: ['A仓','B仓','C仓','总仓'].map((name, i) => ({
+    type: 'gauge',
+    radius: '38%',
+    center: [`${(i%2)*50+25}%`, `${Math.floor(i/2)*50+30}%`],
+    startAngle: 200, endAngle: -20,
+    progress: { show: true, width: 6, roundCap: true,
+      itemStyle: { color: ['#ef4444','#f59e0b','#00d4ff','#10b981'][i] } },
+    axisLine: { lineStyle: { width: 6, color: [[1,'rgba(74,144,226,0.15)']] } },
+    splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false },
+    pointer: { show: false },
+    detail: { valueAnimation: true, fontSize: 14, color: '#fff', formatter: '{c}%', offsetCenter: [0,'5%'] },
+    title: { offsetCenter: [0,'70%'], fontSize: 10, color: Dashboard.TEXT_COLOR },
+    data: [{ value: [85, 92, 78, 88][i], name }]
+  }))
 });
 
+// ========== 出入库 (c5) - 占位用同样的双轴 ==========
 charts.c5 = Dashboard.createChart('c5', {
   backgroundColor: 'transparent',
-  series: [{
-    type: 'gauge', startAngle: 200, endAngle: -20, min: 0, max: 100,
-    progress: { show: true, width: 18,
-      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,1,0,[
-        {offset:0,color:'#00d4ff'},{offset:1,color:'#a855f7'}]) } },
-    axisLine: { lineStyle: { width: 18, color: [[1,'rgba(74,144,226,0.15)']] } },
-    pointer: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
-    anchor: { show: false },
-    detail: { valueAnimation: true, fontSize: 36, color: '#fff', formatter: '{value}%', offsetCenter: [0,'10%'] },
-    title: { offsetCenter: [0,'40%'], fontSize: 14, color: Dashboard.TEXT_COLOR },
-    data: [{ value: 75, name: '安全库存覆盖率' }]
-  }]
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '8%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: MONTHS, ...Dashboard.axisStyle() },
+  yAxis: [
+    { type: 'value', name: '入库', ...Dashboard.axisStyle() },
+    { type: 'value', name: '出库', ...Dashboard.axisStyle(), splitLine: { show: false } }
+  ],
+  series: [
+    { name: '入库', type: 'bar', data: [320,280,350,410,380,450,420,480], itemStyle: { color: Dashboard.barGradient('#00d4ff'), borderRadius: [4,4,0,0] }, barWidth: 16 },
+    { name: '出库', type: 'line', yAxisIndex: 1, smooth: true, data: [280,250,310,360,340,400,380,430], ...Dashboard.lineStyle('#ff6b35', false) }
+  ]
 });
 
+// ========== 品类周转排名 (c6) ==========
 charts.c6 = Dashboard.createChart('c6', {
   backgroundColor: 'transparent',
   tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
   grid: { left: '5%', right: '10%', top: '5%', bottom: '5%', containLabel: true },
   xAxis: { type: 'value', show: false },
-  yAxis: { type: 'category', inverse: true, data: ['项目A','项目B','项目C','项目D','项目E','项目F','项目G','项目H'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  yAxis: { type: 'category', inverse: true, data: ['生鲜','饮料','零食','美妆','小家电','配件','文具','男装','家电','女装'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
   series: [{
     type: 'bar', barWidth: 12,
-    data: [85,78,72,65,58,52,45,38],
+    data: [12.5, 10.2, 8.5, 6.8, 5.5, 4.2, 3.8, 3.2, 2.5, 1.8],
     itemStyle: {
       borderRadius: [0,4,4,0],
       color: function(p) {
-        const colors = Dashboard.PALETTE;
-        return new echarts.graphic.LinearGradient(0,0,1,0,[
-          {offset:0,color:colors[p.dataIndex%8]+'33'},
-          {offset:1,color:colors[p.dataIndex%8]}
-        ]);
+        const colors = ['#10b981','#10b981','#00d4ff','#00d4ff','#00d4ff','#f59e0b','#f59e0b','#f59e0b','#a855f7','#ef4444'];
+        return colors[p.dataIndex];
       }
     },
-    label: { show: true, position: 'right', formatter: '{c}', color: '#fff' }
+    label: { show: true, position: 'right', formatter: '{c}次', color: '#fff', fontSize: 10 }
   }]
 });
 </script>
