@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C7 - 表格排名</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+  body { padding: 20px; }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1200px; margin: 0 auto; }
+  .card-title { color: var(--primary); font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 3px solid var(--secondary); }
+  .chart { width: 100%; height: 380px; }
+</style>
+</head>
+<body>
+<h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C7 - 表格 + 排名</h2>
+<div class="demo-grid">
+  <div class="card">
+    <div class="card-title">销售排行（带排名色阶）</div>
+    <div class="chart" id="t1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">门店明细表格</div>
+    <div class="chart" id="t2"></div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+// 1. 销售排行（柱状排名）
+Dashboard.createChart('t1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { left: '15%', right: '8%', top: '5%', bottom: '5%', containLabel: false },
+  xAxis: { type: 'value', show: false },
+  yAxis: {
+    type: 'category', inverse: true,
+    data: ['门店A', '门店B', '门店C', '门店D', '门店E', '门店F', '门店G', '门店H'],
+    axisLine: { show: false }, axisTick: { show: false },
+    axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 12 }
+  },
+  series: [{
+    type: 'bar',
+    data: [980, 920, 850, 780, 720, 650, 580, 520].map((v, i) => ({
+      value: v,
+      itemStyle: {
+        borderRadius: [0, 4, 4, 0],
+        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+          { offset: 0, color: Dashboard.PALETTE[i % 8] + '33' },
+          { offset: 1, color: Dashboard.PALETTE[i % 8] }
+        ])
+      }
+    })),
+    barWidth: 16,
+    label: {
+      show: true, position: 'right',
+      formatter: '{c}万',
+      color: '#fff', fontSize: 11
+    }
+  }]
+});
+
+// 2. 表格
+Dashboard.createChart('t2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: Dashboard.TEXT_COLOR, fontSize: 10 } },
+  dataset: {
+    dimensions: ['门店', '销售额', '毛利', '客流量', '坪效', '等级'],
+    source: [
+      { '门店': '北京朝阳店', '销售额': 980, '毛利': 280, '客流量': 5200, '坪效': 85, '等级': '★★★★★' },
+      { '门店': '上海徐汇店', '销售额': 920, '毛利': 260, '客流量': 4800, '坪效': 82, '等级': '★★★★★' },
+      { '门店': '广州天河店', '销售额': 850, '毛利': 240, '客流量': 4500, '坪效': 78, '等级': '★★★★' },
+      { '门店': '深圳南山店', '销售额': 780, '毛利': 220, '客流量': 4200, '坪效': 75, '等级': '★★★★' },
+      { '门店': '成都春熙店', '销售额': 720, '毛利': 200, '客流量': 3800, '坪效': 70, '等级': '★★★' },
+      { '门店': '杭州西湖店', '销售额': 650, '毛利': 180, '客流量': 3500, '坪效': 68, '等级': '★★★' }
+    ]
+  },
+  xAxis: { type: 'category', ...Dashboard.axisStyle() },
+  yAxis: { ...Dashboard.axisStyle() },
+  grid: { left: '5%', right: '8%', top: '5%', bottom: '15%' },
+  series: [
+    { type: 'bar', encode: { x: '门店', y: '销售额' }, itemStyle: { color: '#00d4ff' }, barWidth: 14 },
+    { type: 'bar', encode: { x: '门店', y: '毛利' }, itemStyle: { color: '#a855f7' }, barWidth: 14 },
+    { type: 'bar', encode: { x: '门店', y: '客流量' }, itemStyle: { color: '#ff6b35' }, barWidth: 14 }
+  ]
+});
+</script>
+</body>
+</html>
