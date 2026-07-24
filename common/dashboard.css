@@ -132,7 +132,7 @@ body[data-theme="minimal"] .card::before, body[data-theme="minimal"] .card::afte
 
 /* ============================================ */
 /* 导航条 - 后退 + Home                         */
-/* ============================================ */
+/* 导航条 - 后退 + Home */
 .nav-bar {
   position: fixed;
   top: 16px;
@@ -141,34 +141,34 @@ body[data-theme="minimal"] .card::before, body[data-theme="minimal"] .card::afte
   display: flex;
   gap: 10px;
   pointer-events: auto;
-  font-family: inherit;
+  font-family: -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "EmojiOne Color", sans-serif;
 }
 .nav-btn {
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
   min-width: 44px;
   height: 44px;
   padding: 0 14px;
-  background: linear-gradient(135deg, rgba(22,33,62,0.95), rgba(15,25,50,0.98));
-  border: 1.5px solid var(--primary);
+  background: linear-gradient(135deg, rgba(22,33,62,0.95), rgba(15,25,50,0.98)) !important;
+  border: 1.5px solid var(--primary, #00d4ff) !important;
   border-radius: 22px;
-  color: var(--primary);
+  color: var(--primary, #00d4ff) !important;
   text-decoration: none;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.25s ease;
-  box-shadow: 0 0 12px var(--primary-glow), 0 2px 6px rgba(0,0,0,0.4);
+  box-shadow: 0 0 12px var(--primary-glow, rgba(0,212,255,0.5)), 0 2px 6px rgba(0,0,0,0.4);
   letter-spacing: 0.5px;
   font-family: inherit;
-  text-shadow: 0 0 8px var(--primary-glow);
+  text-shadow: 0 0 8px var(--primary-glow, rgba(0,212,255,0.5));
 }
 .nav-btn .icon {
-  font-size: 16px;
+  font-size: 16px !important;
   margin-right: 4px;
-  filter: drop-shadow(0 0 4px var(--primary-glow));
+  filter: drop-shadow(0 0 4px var(--primary-glow, rgba(0,212,255,0.5)));
 }
 .nav-btn:hover {
   background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(168,85,247,0.2));
