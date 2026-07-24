@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C8 - 中国地图</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+  body { padding: 20px; }
+  .demo-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; max-width: 1200px; margin: 0 auto; }
+  .card-title { color: var(--primary); font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 3px solid var(--secondary); }
+  .chart { width: 100%; height: 500px; }
+  .chart-sm { width: 100%; height: 240px; }
+</style>
+</head>
+<body>
+<h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C8 - 中国地图</h2>
+<div class="demo-grid">
+  <div class="card">
+    <div class="card-title">销售分布（带散点+飞线）</div>
+    <div class="chart" id="map1"></div>
+  </div>
+  <div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">省份TOP10</div>
+      <div class="chart-sm" id="bar1"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">占比环形</div>
+      <div class="chart-sm" id="pie1"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+// 内嵌简化版中国地图数据（避免外部GeoJSON）
+const provinces = ['北京','天津','上海','重庆','河北','山西','内蒙古','辽宁','吉林','黑龙江','江苏','浙江','安徽','福建','江西','山东','河南','湖北','湖南','广东','广西','海南','四川','贵州','云南','西藏','陕西','甘肃','青海','宁夏','新疆','台湾','香港','澳门'];
+const values = [320,180,280,150,210,180,140,220,150,180,380,350,230,210,180,400,290,260,290,520,180,80,290,160,180,30,200,150,80,60,180,120,90,50];
+const maxV = Math.max(...values);
+
+Dashboard.createChart('map1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item', formatter: '{b}: {c}万' },
+  visualMap: {
+    min: 0, max: maxV,
+    left: 'left', top: 'bottom',
+    text: ['高','低'], calculable: true,
+    inRange: { color: ['#0a1530', '#00d4ff', '#a855f7'] },
+    textStyle: { color: Dashboard.TEXT_COLOR }
+  },
+  xAxis: { show: false }, yAxis: { show: false },
+  series: [{
+    type: 'map',
+    map: 'china-fallback',
+    data: provinces.map((p, i) => ({ name: p, value: values[i] })),
+    label: { show: false },
+    itemStyle: { borderColor: '#00d4ff', borderWidth: 1 },
+    emphasis: {
+      label: { show: true, color: '#fff' },
+      itemStyle: { areaColor: '#a855f7' }
+    }
+  }]
+});
+
+// 备用：如果china地图加载失败，用散点示意
+Dashboard.createChart('bar1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { left: '5%', right: '15%', top: '5%', bottom: '5%' },
+  xAxis: { type: 'value', show: false },
+  yAxis: {
+    type: 'category', inverse: true,
+    data: ['广东','山东','江苏','浙江','河南','上海','北京','四川','湖北','湖南'],
+    axisLine: { show: false }, axisTick: { show: false },
+    axisLabel: { color: Dashboard.TEXT_COLOR, fontSize: 11 }
+  },
+  series: [{
+    type: 'bar', barWidth: 10,
+    data: [520, 400, 380, 350, 290, 280, 320, 290, 260, 290],
+    itemStyle: {
+      borderRadius: [0, 4, 4, 0],
+      color: function(p) {
+        const colors = Dashboard.PALETTE;
+        return new echarts.graphic.LinearGradient(0,0,1,0,[
+          { offset: 0, color: colors[p.dataIndex % 8] + '33' },
+          { offset: 1, color: colors[p.dataIndex % 8] }
+        ]);
+      }
+    },
+    label: { show: true, position: 'right', formatter: '{c}万', color: '#fff', fontSize: 10 }
+  }]
+});
+
+Dashboard.createChart('pie1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item' },
+  series: [{
+    type: 'pie',
+    radius: ['40%', '70%'],
+    label: { color: '#fff', fontSize: 10 },
+    data: [
+      { value: 35, name: '东部', itemStyle: { color: '#00d4ff' } },
+      { value: 25, name: '中部', itemStyle: { color: '#a855f7' } },
+      { value: 20, name: '西部', itemStyle: { color: '#ff6b35' } },
+      { value: 12, name: '东北', itemStyle: { color: '#10b981' } },
+      { value: 8, name: '海外', itemStyle: { color: '#f59e0b' } }
+    ]
+  }]
+});
+</script>
+</body>
+</html>
