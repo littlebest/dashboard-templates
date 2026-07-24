@@ -1,4 +1,4 @@
-// 公共 JS - 数据大屏工具集
+// 公共 JS - 数据大屏工具集 + 主题切换器
 window.Dashboard = (function() {
   const TEXT_COLOR = '#8aa0c0';
   const AXIS_COLOR = 'rgba(74,144,226,0.2)';
@@ -78,9 +78,60 @@ window.Dashboard = (function() {
     tick();
   }
 
+  // ============================================
+  // 主题切换器
+  // ============================================
+  const THEME_KEY = 'dashboard-theme';
+  let mediaQuery = null;
+  let currentTheme = 'default';
+
+  function getSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'default' : 'minimal';
+  }
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    if (theme === 'auto') {
+      document.body.setAttribute('data-theme', getSystemTheme());
+    } else {
+      document.body.setAttribute('data-theme', theme);
+    }
+    // 更新按钮 active 状态
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === theme);
+    });
+    try { localStorage.setItem(THEME_KEY, theme); } catch(e) {}
+  }
+
+  function initTheme() {
+    // 绑定按钮
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
+    });
+    // 监听系统主题变化（auto 模式）
+    if (window.matchMedia) {
+      mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = () => { if (currentTheme === 'auto') applyTheme('auto'); };
+      if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', handler);
+      else if (mediaQuery.addListener) mediaQuery.addListener(handler);
+    }
+    // 恢复保存的主题
+    let saved = 'default';
+    try { saved = localStorage.getItem(THEME_KEY) || 'default'; } catch(e) {}
+    applyTheme(saved);
+  }
+
+  // 页面加载后初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+  } else {
+    initTheme();
+  }
+
   return {
     TEXT_COLOR, AXIS_COLOR, PALETTE,
     createChart, lineStyle, barGradient, axisStyle,
-    startClock, bindResize, rollingNumber
+    startClock, bindResize, rollingNumber,
+    applyTheme
   };
 })();
