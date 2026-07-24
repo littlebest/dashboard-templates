@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>OEE设备效率大屏</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+body { padding: 20px;  }
+.header { text-align: center; margin-bottom: 20px; }
+.header h1 { font-size: 28px; background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 4px; }
+.header .sub { font-size: 12px; color: #4a90e2; letter-spacing: 6px; margin-top: 4px; }
+.time { position: fixed; top: 20px; right: 30px; color: #00d4ff; font-family: 'Courier New', monospace; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 160px 220px 220px; gap: 16px; max-width: 1600px; margin: 0 auto; }
+.kpi-card { background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,25,50,0.95)); border: 1px solid rgba(168,85,247,0.4); border-radius: 8px; padding: 18px; text-align: center; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 30%, rgba(168,85,247,0.1) 50%, transparent 70%); animation: shimmer 3s infinite; }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.kpi-label { font-size: 12px; color: #8aa0c0; margin-bottom: 6px; position: relative; }
+.kpi-value { font-size: 32px; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Courier New', monospace; position: relative; }
+.kpi-unit { font-size: 12px; color: #a855f7; margin-left: 4px; -webkit-text-fill-color: #a855f7; }
+.kpi-trend { font-size: 11px; margin-top: 4px; position: relative; }
+.trend-up { color: #10b981; } .trend-down { color: #ef4444; }
+.chart { width: 100%; height: calc(100% - 30px); }
+</style>
+</head>
+<body>
+<div class="time" id="time"></div>
+<div class="header">
+  <h1>OEE设备效率大屏</h1>
+  <div class="sub">EQUIPMENT OEE</div>
+</div>
+
+<div class="grid">
+  <div class="kpi-card"><div class="kpi-label">OEE</div><div class="kpi-value">78.5<span class="kpi-unit">%</span></div><div class="kpi-trend trend-up">▲ +2.5%</div></div>
+  <div class="kpi-card"><div class="kpi-label">稼动率</div><div class="kpi-value">88.2<span class="kpi-unit">%</span></div><div class="kpi-trend trend-up">▲ +1.8%</div></div>
+  <div class="kpi-card"><div class="kpi-label">性能效率</div><div class="kpi-value">92.5<span class="kpi-unit">%</span></div><div class="kpi-trend trend-up">▲ +1.2%</div></div>
+  <div class="kpi-card"><div class="kpi-label">良品率</div><div class="kpi-value">96.3<span class="kpi-unit">%</span></div><div class="kpi-trend trend-up">▲ +0.5%</div></div>
+
+  <div class="card"><div class="card-title">OEE三损分解</div><div class="chart" id="c1"></div></div>
+  <div class="card"><div class="card-title">各设备OEE</div><div class="chart" id="c2"></div></div>
+  <div class="card"><div class="card-title">停机类型</div><div class="chart" id="c3"></div></div>
+  <div class="card"><div class="card-title">速度损失</div><div class="chart" id="c4"></div></div>
+  <div class="card" style="grid-column: span 2;"><div class="card-title">设备效率等级</div><div class="chart" id="c5"></div></div>
+  <div class="card" style="grid-column: span 2;"><div class="card-title">质量损失明细</div><div class="chart" id="c6"></div></div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+Dashboard.startClock('time');
+const charts = {};
+
+charts.c1 = Dashboard.createChart('c1', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+
+charts.c2 = Dashboard.createChart('c2', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+
+charts.c3 = Dashboard.createChart('c3', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+
+charts.c4 = Dashboard.createChart('c4', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+
+charts.c5 = Dashboard.createChart('c5', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+
+charts.c6 = Dashboard.createChart('c6', {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis' },
+  grid: { left: '8%', right: '5%', top: '10%', bottom: '10%' },
+  xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月','8月'], ...Dashboard.axisStyle() },
+  yAxis: { type: 'value', ...Dashboard.axisStyle() },
+  series: [{
+    type: 'line', smooth: true,
+    data: [120,135,128,148,162,155,178,185],
+    ...Dashboard.lineStyle('#00d4ff')
+  }]
+});
+</script>
+</body>
+</html>
