@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C9 - 进度条（圆形 + 矩形）</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="../common/dashboard.css">
+<style>
+  body { padding: 20px; }
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .card-title {
+    color: var(--primary);
+    font-size: 14px;
+    margin-bottom: 12px;
+    padding-left: 10px;
+    border-left: 3px solid var(--secondary);
+  }
+  .chart { width: 100%; height: 340px; }
+
+  /* 矩形进度条样式（圆形外的另一种） */
+  .progress-list {
+    padding: 8px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .prog-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .prog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+  }
+  .prog-label { color: var(--text-primary); font-weight: 600; }
+  .prog-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 15px;
+  }
+  .prog-track {
+    position: relative;
+    width: 100%;
+    height: 14px;
+    background: rgba(74,144,226,0.12);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 7px;
+    box-shadow: 0 0 10px var(--primary-glow);
+    transition: width 1.2s cubic-bezier(.25,.8,.25,1);
+  }
+  .prog-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    animation: shimmer 2.4s infinite;
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .prog-tick {
+    position: absolute;
+    top: -3px; bottom: -3px;
+    width: 1px;
+    background: rgba(255,255,255,0.18);
+  }
+  .legend-row {
+    display: flex;
+    gap: 14px;
+    padding: 6px 16px 14px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .legend-row .sw {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<div class="nav-bar">
+  <a href="javascript:history.back()" class="nav-btn" title="返回上一页">
+    <span class="icon">◀</span><span class="label">后退</span>
+  </a>
+  <a href="../index.html" class="nav-btn" title="回到首页">
+    <span class="icon">🏠</span><span class="label">Home</span>
+  </a>
+</div>
+
+<div class="theme-switcher">
+  <button class="theme-btn" data-theme="default" title="深蓝科技"><span class="dot dot-default"></span><span class="label">Default</span></button>
+  <button class="theme-btn" data-theme="cyber" title="赛博朋克"><span class="dot dot-cyber"></span><span class="label">Cyber</span></button>
+  <button class="theme-btn" data-theme="warm" title="暖橙活力"><span class="dot dot-warm"></span><span class="label">Warm</span></button>
+  <button class="theme-btn" data-theme="minimal" title="极简灰白"><span class="dot dot-minimal"></span><span class="label">Minimal</span></button>
+  <button class="theme-btn" data-theme="auto" title="跟随系统"><span class="dot dot-auto"></span><span class="label">Auto</span></button>
+</div>
+
+<h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C9 - 进度条（圆形 / 矩形）</h2>
+
+<div class="demo-grid">
+  <!-- 圆形进度环 -->
+  <div class="card">
+    <div class="card-title">① 圆形进度环（单环 88%）</div>
+    <div class="chart" id="p1"></div>
+  </div>
+
+  <!-- 矩形进度条（作业进度演示） -->
+  <div class="card">
+    <div class="card-title">② 矩形进度条（作业进度 88%）</div>
+    <div class="progress-list" id="progList">
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">订单处理</span>
+          <span class="prog-value">88%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="88"></div>
+        </div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">物料齐套</span>
+          <span class="prog-value">62%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="62"></div>
+        </div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">生产装配</span>
+          <span class="prog-value">45%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="45"></div>
+        </div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">质检入库</span>
+          <span class="prog-value">30%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="30"></div>
+        </div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">物流发运</span>
+          <span class="prog-value">15%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="15"></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend-row">
+      <span><i class="sw" style="background:linear-gradient(90deg,var(--primary),var(--secondary));"></i>已完成</span>
+      <span><i class="sw" style="background:rgba(74,144,226,0.12);border:1px solid var(--border);"></i>未完成</span>
+    </div>
+  </div>
+
+  <!-- 圆环多指标 -->
+  <div class="card">
+    <div class="card-title">③ 圆形多环（综合进度）</div>
+    <div class="chart" id="p2"></div>
+  </div>
+</div>
+
+<script src="../common/dashboard.js"></script>
+<script>
+// ① 单环进度环 — 88% 作业进度
+Dashboard.createChart('p1', {
+  backgroundColor: 'transparent',
+  series: [{
+    type: 'gauge',
+    startAngle: 90, endAngle: -270,
+    min: 0, max: 100,
+    radius: '85%',
+    progress: {
+      show: true, width: 14, roundCap: true,
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0,0,1,1,[
+          {offset:0,color:'#00d4ff'},
+          {offset:1,color:'#a855f7'}
+        ])
+      }
+    },
+    axisLine: { lineStyle: { width: 14, color: [[1, 'rgba(74,144,226,0.15)']] } },
+    splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false },
+    pointer: { show: false },
+    anchor: { show: true, size: 10, itemStyle: { color: '#a855f7', borderColor: '#fff', borderWidth: 2 } },
+    title: {
+      offsetCenter: [0, '40%'], fontSize: 14, color: Dashboard.TEXT_COLOR,
+      formatter: () => '作业进度'
+    },
+    detail: {
+      valueAnimation: true, fontSize: 42, fontWeight: 'bold', color: '#fff',
+      formatter: (v) => `{n|${v.toFixed(0)}}{u|%}}`,
+      rich: { n: { fontSize: 42, color: '#fff', fontWeight: 700 }, u: { fontSize: 18, color: '#00d4ff', padding: [0,0,0,4] } },
+      offsetCenter: [0, '5%']
+    },
+    data: [{ value: 88, name: '作业进度' }]
+  }]
+});
+
+// ② 多环进度 — 关键节点
+Dashboard.createChart('p2', {
+  backgroundColor: 'transparent',
+  series: [
+    { type: 'gauge', radius: '60%', center: ['20%', '50%'],
+      startAngle: 90, endAngle: -270, progress: { show: true, width: 5, roundCap: true, itemStyle: { color: '#00d4ff' } },
+      axisLine: { lineStyle: { width: 5, color: [[1, 'rgba(74,144,226,0.15)']] } },
+      splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, pointer: { show: false },
+      detail: { valueAnimation: true, fontSize: 16, color: '#fff', formatter: '{value}%', offsetCenter: [0, '0%'] },
+      title: { offsetCenter: [0, '70%'], fontSize: 10, color: Dashboard.TEXT_COLOR },
+      data: [{ value: 88, name: '总进度' }] },
+    { type: 'gauge', radius: '60%', center: ['50%', '50%'],
+      startAngle: 90, endAngle: -270, progress: { show: true, width: 5, roundCap: true, itemStyle: { color: '#a855f7' } },
+      axisLine: { lineStyle: { width: 5, color: [[1, 'rgba(74,144,226,0.15)']] } },
+      splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, pointer: { show: false },
+      detail: { valueAnimation: true, fontSize: 16, color: '#fff', formatter: '{value}%', offsetCenter: [0, '0%'] },
+      title: { offsetCenter: [0, '70%'], fontSize: 10, color: Dashboard.TEXT_COLOR },
+      data: [{ value: 65, name: '交付率' }] },
+    { type: 'gauge', radius: '60%', center: ['80%', '50%'],
+      startAngle: 90, endAngle: -270, progress: { show: true, width: 5, roundCap: true, itemStyle: { color: '#10b981' } },
+      axisLine: { lineStyle: { width: 5, color: [[1, 'rgba(74,144,226,0.15)']] } },
+      splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, pointer: { show: false },
+      detail: { valueAnimation: true, fontSize: 16, color: '#fff', formatter: '{value}%', offsetCenter: [0, '0%'] },
+      title: { offsetCenter: [0, '70%'], fontSize: 10, color: Dashboard.TEXT_COLOR },
+      data: [{ value: 92, name: '良品率' }] }
+  ]
+});
+
+// 矩形条宽度动画
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.prog-fill').forEach(el => {
+      el.style.width = el.dataset.val + '%';
+    });
+  }, 200);
+});
+</script>
+</body>
+</html>
