@@ -24,8 +24,8 @@
   /* 状态图容器：8 个单元并排 */
   .status-grid {
     display: grid;
-    /* 8 单元，每单元 5 列 + 单元间 1 空列；列数 = 8*5 + 7 = 47 列 */
-    grid-template-columns: repeat(47, 1fr);
+    /* 8 单元，每单元 5 列；列数 = 8*5 = 40 列；单元间用 margin 留空 */
+    grid-template-columns: repeat(40, 1fr);
     gap: 4px;
     padding: 16px;
   }
@@ -39,12 +39,12 @@
     gap: 3px;
     aspect-ratio: 5 / 4;
   }
-  /* 单元之间留 1 列空白：用 margin-right 在最后一列补偿，简化做法是第 N 个单元后插入 spacer */
+  /* 单元之间留 1 列空白 */
   .cell + .cell { margin-left: 4px; }
 
   /* 小方块 */
   .block {
-    background: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.9);
     border: 1px solid rgba(0,0,0,0.08);
     border-radius: 2px;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -58,16 +58,6 @@
   .block.busy   { background: #6b7280; border-color: #4b5563; }   /* 灰色 - 占用 */
   .block.done   { background: #10b981; border-color: #059669; box-shadow: 0 0 4px rgba(16,185,129,0.5); }
   .block.empty  { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.1); } /* 白色 - 空闲 */
-
-  /* 单元编号标签 */
-  .cell-label {
-    grid-column: span 5;
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-top: 4px;
-    font-family: 'Courier New', monospace;
-  }
 
   /* 状态汇总 */
   .summary {
@@ -89,36 +79,6 @@
     color: var(--primary);
     font-weight: 700;
     font-family: 'Courier New', monospace;
-  }
-
-  /* 第二个 demo：车间实时刷新（动效版） */
-  .controls {
-    display: flex;
-    gap: 10px;
-    padding: 8px 16px;
-    align-items: center;
-  }
-  .btn {
-    padding: 6px 14px;
-    border-radius: 4px;
-    border: 1px solid var(--primary);
-    background: transparent;
-    color: var(--primary);
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn:hover {
-    background: var(--primary);
-    color: #fff;
-  }
-  .flash {
-    animation: flash 0.6s ease;
-  }
-  @keyframes flash {
-    0% { box-shadow: 0 0 0 rgba(245,158,11,0); }
-    50% { box-shadow: 0 0 10px rgba(245,158,11,0.9); }
-    100% { box-shadow: 0 0 0 rgba(245,158,11,0); }
   }
 </style>
 </head>
@@ -143,144 +103,60 @@
 <h2 style="text-align:center;color:var(--primary);margin-bottom:20px;">C10 - 状态图（4×5 单元 × 8 并排）</h2>
 
 <div class="demo-wrap">
-  <!-- 示例 1：固定展示（生产线 A） -->
   <div class="card">
-    <div class="card-title">① 车间 A · 工位状态（8 单元 × 20 方块 = 160 工位）</div>
-    <div class="status-grid" id="grid1"></div>
-    <div class="summary" id="summary1"></div>
-  </div>
-
-  <!-- 示例 2：实时刷新版（可点 Start 触发） -->
-  <div class="card">
-    <div class="card-title">② 车间 B · 实时刷新版</div>
-    <div class="controls">
-      <button class="btn" id="btnStart">▶ Start</button>
-      <button class="btn" id="btnStop">■ Stop</button>
-      <span style="font-size:11px;color:var(--text-secondary);">每 1.5s 刷新一次状态</span>
-    </div>
-    <div class="status-grid" id="grid2"></div>
-    <div class="summary" id="summary2"></div>
+    <div class="card-title">作业状态（8 单元 × 20 方块 = 160 作业位）</div>
+    <div class="status-grid" id="grid"></div>
+    <div class="summary" id="summary"></div>
   </div>
 </div>
 
 <script src="../common/dashboard.js"></script>
 <script>
-// === 通用：构建状态图 ===
-// states: 二维数组，长度=8，每个元素长度=20（4×5）
-function buildGrid(containerId, states, summaryId) {
-  const grid = document.getElementById(containerId);
-  grid.innerHTML = '';
-  const counts = { empty: 0, busy: 0, done: 0 };
-
-  states.forEach((cellStates, cellIdx) => {
-    const cell = document.createElement('div');
-    cell.className = 'cell';
-
-    cellStates.forEach(state => {
-      const b = document.createElement('div');
-      b.className = 'block ' + state;
-      counts[state] = (counts[state] || 0) + 1;
-      cell.appendChild(b);
-    });
-
-    grid.appendChild(cell);
-
-    // 单元之间的分隔标签（可选）
-    if (cellIdx < states.length - 1 && (cellIdx + 1) % 4 === 0) {
-      // 每 4 单元换视觉行（通过额外 margin 控制间距已足够）
-    }
-  });
-
-  // 汇总
-  const s = document.getElementById(summaryId);
-  if (s) {
-    const total = counts.empty + counts.busy + counts.done;
-    s.innerHTML = `
-      <div class="item"><span class="sw" style="background:rgba(255,255,255,0.9);"></span>空闲 <span class="num">${counts.empty}</span></div>
-      <div class="item"><span class="sw" style="background:#6b7280;"></span>占用 <span class="num">${counts.busy}</span></div>
-      <div class="item"><span class="sw" style="background:#10b981;"></span>完成 <span class="num">${counts.done}</span></div>
-      <div class="item" style="margin-left:auto;">合计 <span class="num">${total}</span> 工位</div>
-    `;
-  }
-}
-
 // === 数据生成 ===
-// 固定演示数据（车间 A — 展示完整进度推进）
-const fixedStates = [
-  // 单元 0：全完成
-  Array(20).fill('done'),
-  // 单元 1：大多完成
-  [...Array(16).fill('done'), ...Array(4).fill('busy')],
-  // 单元 2：完成 + 占用
-  [...Array(14).fill('done'), ...Array(3).fill('busy'), ...Array(3).fill('empty')],
-  // 单元 3：半成品
-  [...Array(11).fill('done'), ...Array(5).fill('busy'), ...Array(4).fill('empty')],
-  // 单元 4：进行中
-  [...Array(8).fill('done'), ...Array(8).fill('busy'), ...Array(4).fill('empty')],
-  // 单元 5：刚开始
-  [...Array(5).fill('done'), ...Array(10).fill('busy'), ...Array(5).fill('empty')],
-  // 单元 6：刚启动
-  [...Array(3).fill('done'), ...Array(8).fill('busy'), ...Array(9).fill('empty')],
-  // 单元 7：全空（待开工）
-  Array(20).fill('empty')
+// 单元 1：连续 8 个灰 + 12 个白
+// 单元 2：连续 12 个灰 + 8 个白
+// 单元 3：全绿（20）
+// 单元 4：全白（20）
+// 单元 5：全绿（20）
+// 单元 6：全白（20）
+// 单元 7：全白（20）
+// 单元 8：全白（20）
+const states = [
+  [...Array(8).fill('busy'),  ...Array(12).fill('empty')],   // 单元 1
+  [...Array(12).fill('busy'), ...Array(8).fill('empty')],    // 单元 2
+  Array(20).fill('done'),                                   // 单元 3
+  Array(20).fill('empty'),                                  // 单元 4
+  Array(20).fill('done'),                                   // 单元 5
+  Array(20).fill('empty'),                                  // 单元 6
+  Array(20).fill('empty'),                                  // 单元 7
+  Array(20).fill('empty'),                                  // 单元 8
 ];
 
-buildGrid('grid1', fixedStates, 'summary1');
+// === 构建状态图 ===
+const grid = document.getElementById('grid');
+const counts = { empty: 0, busy: 0, done: 0 };
 
-// === 实时刷新版（车间 B） ===
-function randStates() {
-  return Array.from({ length: 8 }, () => {
-    // 每单元 20 格，按概率分配：完成 30% / 占用 35% / 空闲 35%
-    return Array.from({ length: 20 }, () => {
-      const r = Math.random();
-      if (r < 0.30) return 'done';
-      if (r < 0.65) return 'busy';
-      return 'empty';
-    });
+states.forEach((cellStates, cellIdx) => {
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  cellStates.forEach(state => {
+    const b = document.createElement('div');
+    b.className = 'block ' + state;
+    counts[state] = (counts[state] || 0) + 1;
+    cell.appendChild(b);
   });
-}
+  grid.appendChild(cell);
+});
 
-buildGrid('grid2', randStates(), 'summary2');
-
-let timer = null;
-document.getElementById('btnStart').onclick = () => {
-  if (timer) return;
-  timer = setInterval(() => {
-    const newStates = randStates();
-    // 找变化的格子加 flash
-    const grid = document.getElementById('grid2');
-    const cells = grid.querySelectorAll('.cell');
-    newStates.forEach((cellStates, i) => {
-      const old = Array.from(cells[i].children).map(b => {
-        if (b.classList.contains('done')) return 'done';
-        if (b.classList.contains('busy')) return 'busy';
-        return 'empty';
-      });
-      cellStates.forEach((s, j) => {
-        if (old[j] !== s) {
-          cells[i].children[j].classList.add('flash');
-          setTimeout(() => cells[i].children[j].classList.remove('flash'), 600);
-        }
-        cells[i].children[j].className = 'block ' + s;
-      });
-    });
-    // 更新汇总
-    const counts = { empty: 0, busy: 0, done: 0 };
-    newStates.forEach(cell => cell.forEach(s => counts[s]++));
-    const s = document.getElementById('summary2');
-    const total = counts.empty + counts.busy + counts.done;
-    s.innerHTML = `
-      <div class="item"><span class="sw" style="background:rgba(255,255,255,0.9);"></span>空闲 <span class="num">${counts.empty}</span></div>
-      <div class="item"><span class="sw" style="background:#6b7280;"></span>占用 <span class="num">${counts.busy}</span></div>
-      <div class="item"><span class="sw" style="background:#10b981;"></span>完成 <span class="num">${counts.done}</span></div>
-      <div class="item" style="margin-left:auto;">合计 <span class="num">${total}</span> 工位</div>
-    `;
-  }, 1500);
-};
-
-document.getElementById('btnStop').onclick = () => {
-  if (timer) { clearInterval(timer); timer = null; }
-};
+// === 汇总 ===
+const s = document.getElementById('summary');
+const total = counts.empty + counts.busy + counts.done;
+s.innerHTML = `
+  <div class="item"><span class="sw" style="background:rgba(255,255,255,0.9);"></span>空闲 <span class="num">${counts.empty}</span></div>
+  <div class="item"><span class="sw" style="background:#6b7280;"></span>占用 <span class="num">${counts.busy}</span></div>
+  <div class="item"><span class="sw" style="background:#10b981;"></span>完成 <span class="num">${counts.done}</span></div>
+  <div class="item" style="margin-left:auto;">合计 <span class="num">${total}</span> 作业位</div>
+`;
 </script>
 </body>
 </html>
