@@ -23,12 +23,12 @@
   }
   .chart { width: 100%; height: 340px; }
 
-  /* 矩形进度条样式（单条 demo） */
+  /* 矩形进度条样式（4 条 demo） */
   .progress-wrap {
-    padding: 30px 24px;
+    padding: 18px 24px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
     justify-content: center;
     height: calc(100% - 42px);
     box-sizing: border-box;
@@ -37,7 +37,8 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-size: 14px;
+    font-size: 13px;
+    margin-bottom: 6px;
   }
   .prog-label { color: var(--text-primary); font-weight: 600; }
   .prog-value {
@@ -49,10 +50,10 @@
   .prog-track {
     position: relative;
     width: 100%;
-    height: 18px;
+    height: 14px;
     background: rgba(74,144,226,0.12);
     border: 1px solid var(--border);
-    border-radius: 9px;
+    border-radius: 7px;
     overflow: hidden;
   }
   .prog-fill {
@@ -110,19 +111,57 @@
     <div class="chart" id="p1"></div>
   </div>
 
-  <!-- ② 矩形进度条（作业进度 90%） -->
+  <!-- ② 矩形进度条（作业进度 1-4） -->
   <div class="card">
-    <div class="card-title">② 矩形进度条（作业进度 90%）</div>
+    <div class="card-title">② 矩形进度条（作业进度 1 ~ 4）</div>
     <div class="progress-wrap">
-      <div class="prog-header">
-        <span class="prog-label">作业进度</span>
-        <span class="prog-value">90%</span>
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">作业进度 1</span>
+          <span class="prog-value">73%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="73"></div>
+        </div>
       </div>
-      <div class="prog-track">
-        <div class="prog-tick" style="left:25%"></div>
-        <div class="prog-tick" style="left:50%"></div>
-        <div class="prog-tick" style="left:75%"></div>
-        <div class="prog-fill" data-val="90"></div>
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">作业进度 2</span>
+          <span class="prog-value">41%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="41"></div>
+        </div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">作业进度 3</span>
+          <span class="prog-value">96%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="96"></div>
+        </div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header">
+          <span class="prog-label">作业进度 4</span>
+          <span class="prog-value">58%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-tick" style="left:25%"></div>
+          <div class="prog-tick" style="left:50%"></div>
+          <div class="prog-tick" style="left:75%"></div>
+          <div class="prog-fill" data-val="58"></div>
+        </div>
       </div>
     </div>
   </div>
